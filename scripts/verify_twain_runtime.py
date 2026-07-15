@@ -16,12 +16,8 @@ def _candidate_dsm_paths() -> list[Path]:
     candidates: list[Path] = []
     system_root = os.environ.get("SystemRoot")
     if system_root:
-        candidates.extend(
-            [
-                Path(system_root) / "System32" / "TWAINDSM.DLL",
-                Path(system_root) / "SysWOW64" / "TWAINDSM.DLL",
-            ]
-        )
+        # 64 位进程下，System32 是 64 位系统目录；SysWOW64 只包含 32 位 DLL。
+        candidates.append(Path(system_root) / "System32" / "TWAINDSM.DLL")
 
     executable_dir = Path(sys.executable).resolve().parent
     candidates.append(executable_dir / "TWAINDSM.DLL")
