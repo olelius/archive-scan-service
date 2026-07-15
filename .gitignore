@@ -17,6 +17,7 @@ env/
 # 构建与安装包
 build/
 dist/
+*.egg-info/
 *.spec
 packaging/windows/output/
 
