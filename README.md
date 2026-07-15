@@ -4,7 +4,9 @@
 
 ## 当前状态
 
-当前仅完成项目文档和开发计划，尚未开始 Python代码实现、依赖安装和真实设备测试。
+当前已完成工程初始化以及配置、目录和日志基础实现。项目环境为
+`D:\archive-scan-service\.venv` 下的 Python 3.11.15 64 位 Conda 环境，解释器为
+`D:\archive-scan-service\.venv\python.exe`。扫描业务代码、真实设备测试和安装包仍未开始。
 
 ## 固定范围
 
