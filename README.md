@@ -4,9 +4,10 @@
 
 ## 当前状态
 
-当前已完成工程初始化、配置目录与日志基础，以及 SQLite 任务/页面持久化基础。项目环境为
-`D:\archive-scan-service\.venv` 下的 Python 3.12.13 64 位 Conda 环境，解释器为
-`D:\archive-scan-service\.venv\python.exe`。TWAIN 扫描、进程间协议、HTTP 接口、真实设备测试和安装包仍未开始。
+当前已完成工程初始化、配置目录与日志基础、SQLite 任务/页面持久化、进程间协议、工作进程生命周期管理，以及 DSM 加载和
+TWAIN Data Source 枚举。项目环境为 `D:\archive-scan-service\.venv` 下的 Python 3.12.13 64 位 Conda 环境，解释器为
+`D:\archive-scan-service\.venv\python.exe`。当前机器已枚举到 `KODAK Scanner: i2000`（x64）；KODAK i2600 目标设备的专用兼容性
+仍需单独真机确认。Capability、文件传输、HTTP 接口、托盘程序和安装包仍未开始。
 
 ## 固定范围
 

@@ -10,6 +10,15 @@ import sys
 from pathlib import Path
 
 
+def _configure_utf8_output() -> None:
+    """让 Windows 终端按 UTF-8 输出中文诊断信息。"""
+
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8")
+
+
 def _candidate_dsm_paths() -> list[Path]:
     """返回不修改系统的 TWAINDSM.DLL 候选路径。"""
 
@@ -46,6 +55,7 @@ def _candidate_dsm_paths() -> list[Path]:
 def main() -> int:
     """打印运行时信息，并在基础条件不满足时返回非零值。"""
 
+    _configure_utf8_output()
     failures: list[str] = []
     pointer_bits = struct.calcsize("P") * 8
     print(f"操作系统：{platform.system()}")
@@ -74,6 +84,28 @@ def main() -> int:
     else:
         print("TWAINDSM.DLL：未找到")
         failures.append("未找到 64 位 TWAINDSM.DLL")
+
+    if not failures:
+        from app.scanner.twain_backend import TwainBackend, TwainBackendError
+
+        try:
+            with TwainBackend() as backend:
+                devices = backend.enumerate_devices()
+        except TwainBackendError as exc:
+            print(f"TWAIN 设备枚举：失败（{exc.error_code}）")
+            failures.append(exc.error_code)
+        else:
+            if devices:
+                print(f"TWAIN 设备枚举：找到 {len(devices)} 个 Data Source")
+                for device in devices:
+                    print(
+                        "  - "
+                        f"{device.product_name} / {device.architecture} / "
+                        f"{device.device_id}"
+                    )
+            else:
+                print("TWAIN 设备枚举：未找到 Data Source")
+                failures.append("TWAIN_SOURCE_NOT_FOUND")
 
     if failures:
         print("验证结论：失败")
