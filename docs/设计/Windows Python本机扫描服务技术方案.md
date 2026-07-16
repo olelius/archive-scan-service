@@ -685,37 +685,62 @@ task_deleted
 
 ### 14.1 命令
 
+命令的线上 `type` 使用小写下划线命名：
+
 ```text
-WORKER_INIT
-LIST_DEVICES
-OPEN_SOURCE
-GET_CAPABILITIES
-RESOLVE_CAPABILITIES
-START_SCAN
-STOP_SCAN
-CLOSE_SOURCE
-WORKER_SHUTDOWN
+worker_init
+enumerate_devices
+open_source
+query_capabilities
+resolve_capabilities
+start_scan
+stop_scan
+close_source
+shutdown
 ```
 
 每条命令包含唯一 `commandId`。
 
 ### 14.2 事件
 
+事件的线上 `type` 使用小写下划线命名：
+
 ```text
-COMMAND_SUCCEEDED
-COMMAND_FAILED
-DEVICE_LIST
-CAPABILITIES_RESULT
-SCAN_STARTED
-PAGE_STARTED
-PAGE_COMPLETED
-SCAN_STOPPED
-SCAN_COMPLETED
-SCAN_FAILED
-WORKER_HEARTBEAT
+command_succeeded
+command_failed
+worker_ready
+device_listed
+capabilities_queried
+scan_started
+page_started
+page_file_ready
+scan_stopped
+scan_completed
+scan_failed
+worker_heartbeat
 ```
 
-主进程和工作子进程只传输命令、状态和文件路径，不传输原始图片内容。
+每条消息都包含协议 `version`、消息 `kind`、可判别的 `type` 和 JSON `payload`；命令必须包含唯一 `commandId`，关联任务时包含 `taskId`。示例：
+
+```json
+{
+  "version": 1,
+  "kind": "command",
+  "type": "start_scan",
+  "commandId": "cmd-1",
+  "taskId": "task-1",
+  "payload": {
+    "deviceId": "device-1",
+    "settings": {
+      "ICAP_XRESOLUTION": 300
+    }
+  }
+}
+```
+
+主进程和工作子进程只传输命令、状态和文件路径字符串，不传输原始图片内容、SQLite 连接或 TWAIN 对象。未知协议版本、未知消息类型、命令/事件方向不匹配和非 JSON 值必须拒绝。`page_file_ready` 只表示原图文件已完成传输并提供路径，主进程完成校验、摘要、缩略图和数据库写入后再发布业务页面完成事件。
+
+事件关联约束如下：命令结果、设备列表、Capability查询和扫描生命周期事件必须带 `commandId`；扫描开始、页面、停止、完成和失败事件还必须带 `taskId`；`worker_ready` 和 `worker_heartbeat` 是工作进程级事件，可以不带任务或命令标识。`page_file_ready.payload.path` 必须是非空字符串，任务目录内的规范化路径校验由主进程页面接收层执行。
 
 ### 14.3 串行化
 
