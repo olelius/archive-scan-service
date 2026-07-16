@@ -31,3 +31,6 @@ include = ["app*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+  "integration: 需要真实 Windows 设备或跨进程环境的集成测试",
+]

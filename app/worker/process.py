@@ -8,6 +8,7 @@ from queue import Empty
 import time
 from typing import Any, Callable, Protocol
 
+from app.scanner.twain_backend import TwainBackend, TwainBackendError, TwainDevice
 from app.scanner.protocol import CommandType
 from app.worker.messages import (
     CommandMessage,
@@ -23,6 +24,9 @@ from app.worker.messages import (
 class WorkerRuntime(Protocol):
     """工作进程内的 TWAIN 运行时边界。"""
 
+    def enumerate_devices(self) -> list[TwainDevice]:
+        """枚举当前工作进程可见的 TWAIN Data Source。"""
+
     def close(self) -> None:
         """释放工作进程内的 TWAIN 资源。"""
 
@@ -30,20 +34,29 @@ class WorkerRuntime(Protocol):
 class NoopWorkerRuntime:
     """供隔离测试使用的最小运行时。"""
 
+    def enumerate_devices(self) -> list[TwainDevice]:
+        return []
+
     def close(self) -> None:
         return None
 
 
 class TwainRuntime:
-    """只在工作子进程内导入 pytwain 的运行时边界。"""
+    """只在工作子进程内构造 TWAIN 后端的运行时边界。"""
 
     def __init__(self) -> None:
-        import twain
+        self._backend: TwainBackend | None = TwainBackend()
 
-        self._module = twain
+    def enumerate_devices(self) -> list[TwainDevice]:
+        if self._backend is None:
+            raise RuntimeError("TWAIN 后端已经关闭")
+        return self._backend.enumerate_devices()
 
     def close(self) -> None:
-        self._module = None
+        backend = self._backend
+        self._backend = None
+        if backend is not None:
+            backend.close()
 
 
 def _emit(event_queue: Any, event: EventMessage) -> None:
@@ -101,6 +114,7 @@ def _handle_command(
     event_queue: Any,
     *,
     active_scan: ScanCommand | None,
+    runtime: WorkerRuntime,
 ) -> tuple[ScanCommand | None, bool]:
     """处理一条命令，返回新的扫描状态和是否退出。"""
 
@@ -123,6 +137,50 @@ def _handle_command(
             ),
         )
         return command, False
+
+    if command.message_type == CommandType.ENUMERATE_DEVICES.value:
+        if active_scan is not None:
+            _command_failed(
+                event_queue,
+                command,
+                error_code="SCANNER_BUSY",
+                error_message="扫描期间不能枚举设备",
+            )
+            return active_scan, False
+        try:
+            devices = runtime.enumerate_devices()
+        except TwainBackendError as exc:
+            _command_failed(
+                event_queue,
+                command,
+                error_code=exc.error_code,
+                error_message=str(exc),
+            )
+            return active_scan, False
+        except Exception:
+            _command_failed(
+                event_queue,
+                command,
+                error_code="TWAIN_SOURCE_ENUMERATION_FAILED",
+                error_message="TWAIN Data Source 枚举失败",
+            )
+            return active_scan, False
+
+        for device in devices:
+            _emit(
+                event_queue,
+                EventMessage(
+                    event_type="device_listed",
+                    command_id=command.command_id,
+                    payload=device.to_payload(),
+                ),
+            )
+        _command_succeeded(
+            event_queue,
+            command,
+            payload={"count": len(devices)},
+        )
+        return active_scan, False
 
     if command.message_type == CommandType.SHUTDOWN.value:
         _command_succeeded(event_queue, command)
@@ -215,6 +273,7 @@ class WorkerProcess:
                     command,
                     self._event_queue,
                     active_scan=active_scan,
+                    runtime=runtime,
                 )
                 next_heartbeat = time.monotonic() + self._heartbeat_interval
                 if should_exit:
