@@ -4,9 +4,9 @@
 
 ## 当前状态
 
-当前已完成工程初始化以及配置、目录和日志基础实现。项目环境为
+当前已完成工程初始化、配置目录与日志基础，以及 SQLite 任务/页面持久化基础。项目环境为
 `D:\archive-scan-service\.venv` 下的 Python 3.12.13 64 位 Conda 环境，解释器为
-`D:\archive-scan-service\.venv\python.exe`。扫描业务代码、真实设备测试和安装包仍未开始。
+`D:\archive-scan-service\.venv\python.exe`。TWAIN 扫描、进程间协议、HTTP 接口、真实设备测试和安装包仍未开始。
 
 ## 固定范围
 
