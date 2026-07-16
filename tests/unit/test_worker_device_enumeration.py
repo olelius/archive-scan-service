@@ -41,8 +41,8 @@ def test_enumerate_devices_emits_device_listed_events():
                 TwainDevice(
                     device_id="twain-device-1",
                     manufacturer="KODAK",
-                    product_family="i2000",
-                    product_name="KODAK i2600 Scanner",
+                    product_family="Document Imaging",
+                    product_name="KODAK Scanner: i2000",
                     protocol_major=1,
                     protocol_minor=0,
                     architecture="x64",
@@ -71,7 +71,7 @@ def test_enumerate_devices_emits_device_listed_events():
     assert runtime.calls == 1
     assert listed.event_type == "device_listed"
     assert listed.command_id == "cmd-enumerate-1"
-    assert listed.payload["productName"] == "KODAK i2600 Scanner"
+    assert listed.payload["productName"] == "KODAK Scanner: i2000"
     assert succeeded.event_type == "command_succeeded"
     assert succeeded.payload == {"count": 1}
 

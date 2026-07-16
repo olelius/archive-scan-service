@@ -100,7 +100,8 @@ def main() -> int:
                 for device in devices:
                     print(
                         "  - "
-                        f"{device.product_name} / {device.architecture} / "
+                        f"{device.product_name} / {device.product_family} / "
+                        f"{device.architecture} / "
                         f"{device.device_id}"
                     )
             else:
