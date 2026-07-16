@@ -13,7 +13,7 @@
 ```text
 文档版本：1.0
 编写日期：2026-07-14
-目标设备：KODAK i2600 Scanner
+目标驱动：KODAK Scanner: i2000（kds_i2000.inf，i2000系列共享驱动）
 目标系统：Windows 64位
 ```
 
@@ -226,10 +226,10 @@ app/scanner/
 }
 ```
 
-第一版目标设备：
+第一版目标驱动入口：
 
 ```text
-KODAK i2600 Scanner
+KODAK Scanner: i2000
 ```
 
 本机可以枚举多台64位 TWAIN设备，由调用方选择；同一时间只允许一台设备执行扫描。
@@ -1060,11 +1060,11 @@ SCAN_FAILED
 
 ADF无纸属于正常结束，不作为错误返回。
 
-## 23. KODAK i2600验收标准
+## 23. KODAK i2000系列驱动验收标准
 
 ### 23.1 设备和Capability
 
-- 能够发现 KODAK i2600。
+- 能够发现 `KODAK Scanner: i2000` Data Source。
 - 能够无界面打开 Data Source。
 - 不弹出厂商设置窗口。
 - 能够查询全部标准和私有 Capability。
@@ -1183,7 +1183,7 @@ JPEG
 
 ## 24. 最终结论
 
-第一版采用 Windows 64位 Python本机扫描服务，通过 `pytwain 2.3.0` 和64位 `TWAINDSM.DLL` 调用 KODAK i2600扫描仪。
+第一版采用 Windows 64位 Python本机扫描服务，通过 `pytwain 2.3.0` 和64位 `TWAINDSM.DLL` 调用 `KODAK Scanner: i2000` Data Source；当前真机为 KODAK i2400。
 
 程序采用托盘和 FastAPI主进程加长期 TWAIN工作子进程的双进程架构。TWAIN驱动通过 `TWSX_FILE`直接输出单页 JPEG，Python只保存文件、生成独立缩略图和管理本机扫描任务，不修改原图，不访问业务后端。
 

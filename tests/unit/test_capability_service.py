@@ -26,7 +26,7 @@ class FakeSource:
     containers: dict[tuple[int, CapabilityMessage], RawCapability]
     support_masks: dict[int, int]
     source_manufacturer: str = "KODAK"
-    source_product_name: str = "KODAK i2600 Scanner"
+    source_product_name: str = "KODAK Scanner: i2000"
     get_calls: list[tuple[int, CapabilityMessage]] = field(default_factory=list)
     query_support_calls: list[int] = field(default_factory=list)
     set_calls: list[tuple[int, str, object]] = field(default_factory=list)

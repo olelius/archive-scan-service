@@ -34,8 +34,8 @@ def fake_identity():
     return TwainSourceIdentity(
         source_id=17,
         manufacturer="KODAK",
-        product_family="i2000",
-        product_name="KODAK i2600 Scanner",
+        product_family="Document Imaging",
+        product_name="KODAK Scanner: i2000",
         protocol_major=1,
         protocol_minor=0,
     )
@@ -54,8 +54,8 @@ def test_enumerate_devices_returns_stable_ids(fake_identity):
     assert first == second
     assert first[0].device_id
     assert first[0].manufacturer == "KODAK"
-    assert first[0].product_family == "i2000"
-    assert first[0].product_name == "KODAK i2600 Scanner"
+    assert first[0].product_family == "Document Imaging"
+    assert first[0].product_name == "KODAK Scanner: i2000"
     assert first[0].protocol_major == 1
     assert first[0].protocol_minor == 0
     assert first[0].architecture == "x64"

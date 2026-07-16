@@ -22,8 +22,8 @@ def test_real_twain_device_enumeration():
     assert all(device.architecture == "x64" for device in devices)
     assert any("KODAK" in device.product_name.upper() for device in devices)
 
-    expected_product = os.environ.get("EXPECTED_TWAIN_PRODUCT")
-    if expected_product:
-        assert any(
-            device.product_name == expected_product for device in devices
-        )
+    expected_product = os.environ.get(
+        "EXPECTED_TWAIN_PRODUCT",
+        "KODAK Scanner: i2000",
+    )
+    assert any(device.product_name == expected_product for device in devices)
