@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from pathlib import Path
 import sqlite3
 
 from app.models.records import ScanPageRecord
@@ -12,6 +13,21 @@ from .database import Database
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+
+
+def _normalize_relative_path(value: str) -> str:
+    """校验并规范化任务目录内的相对路径。"""
+
+    path = Path(value)
+    if (
+        not value
+        or path == Path(".")
+        or path.is_absolute()
+        or path.anchor
+        or ".." in path.parts
+    ):
+        raise ValueError("页面文件路径必须是任务目录内的相对路径")
+    return path.as_posix()
 
 
 class PageRepository:
@@ -35,7 +51,21 @@ class PageRepository:
         created_at: str | None = None,
     ) -> ScanPageRecord:
         timestamp = created_at or _utc_now()
+        normalized_original_path = _normalize_relative_path(original_path)
+        normalized_thumbnail_path = _normalize_relative_path(thumbnail_path)
         with self._database.transaction() as connection:
+            task_row = connection.execute(
+                """
+                SELECT last_page_sequence
+                FROM scan_task
+                WHERE task_id = ?
+                """,
+                (task_id,),
+            ).fetchone()
+            if task_row is None:
+                raise KeyError(f"任务不存在：{task_id}")
+            if sequence <= task_row["last_page_sequence"]:
+                raise ValueError("页面 sequence 必须严格递增且不能复用")
             connection.execute(
                 """
                 INSERT INTO scan_page (
@@ -56,14 +86,22 @@ class PageRepository:
                     page_id,
                     task_id,
                     sequence,
-                    original_path,
-                    thumbnail_path,
+                    normalized_original_path,
+                    normalized_thumbnail_path,
                     sha256,
                     file_size,
                     width,
                     height,
                     timestamp,
                 ),
+            )
+            connection.execute(
+                """
+                UPDATE scan_task
+                SET last_page_sequence = ?, updated_at = ?
+                WHERE task_id = ?
+                """,
+                (sequence, timestamp, task_id),
             )
         record = self.get(task_id, page_id)
         if record is None:
@@ -112,12 +150,14 @@ class PageRepository:
     def next_sequence(self, task_id: str) -> int:
         row = self._database.connection.execute(
             """
-            SELECT COALESCE(MAX(sequence), 0) + 1 AS next_sequence
-            FROM scan_page
+            SELECT last_page_sequence + 1 AS next_sequence
+            FROM scan_task
             WHERE task_id = ?
             """,
             (task_id,),
         ).fetchone()
+        if row is None:
+            raise KeyError(f"任务不存在：{task_id}")
         return int(row["next_sequence"])
 
     def delete(self, task_id: str, page_id: str) -> bool:

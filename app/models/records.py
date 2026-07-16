@@ -14,6 +14,7 @@ class ScanTaskRecord:
     status: TaskStatus
     created_at: str
     updated_at: str
+    last_page_sequence: int = 0
     error_code: str | None = None
     error_message: str | None = None
     device_snapshot_json: str | None = None

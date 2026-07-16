@@ -134,6 +134,7 @@ class TaskRepository:
             status=TaskStatus(row["status"]),
             created_at=row["created_at"],
             updated_at=row["updated_at"],
+            last_page_sequence=row["last_page_sequence"],
             error_code=row["error_code"],
             error_message=row["error_message"],
             device_snapshot_json=row["device_snapshot_json"],

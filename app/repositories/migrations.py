@@ -30,7 +30,8 @@ CREATE TABLE scan_task (
     capability_snapshot_json TEXT,
     scan_params_snapshot_json TEXT,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    last_page_sequence INTEGER NOT NULL DEFAULT 0 CHECK (last_page_sequence >= 0)
 );
 
 CREATE TABLE scan_page (

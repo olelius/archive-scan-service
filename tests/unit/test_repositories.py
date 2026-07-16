@@ -77,6 +77,65 @@ def test_pages_can_be_loaded_after_a_sequence(repository_bundle):
     assert [item.page_id for item in loaded] == ["page-2", "page-3"]
 
 
+def test_next_page_sequence_is_not_reused_after_deleting_last_page(
+    repository_bundle,
+):
+    tasks, pages, _ = repository_bundle
+    tasks.create("task-1", "device-1")
+    pages.create("page-1", "task-1", 1, "a.jpg", "a-thumb.jpg", "hash-a", 101)
+    pages.create("page-2", "task-1", 2, "b.jpg", "b-thumb.jpg", "hash-b", 202)
+
+    pages.delete("task-1", "page-2")
+
+    assert pages.next_sequence("task-1") == 3
+
+
+def test_page_sequence_cannot_reuse_a_deleted_value(repository_bundle):
+    tasks, pages, _ = repository_bundle
+    tasks.create("task-1", "device-1")
+    pages.create("page-1", "task-1", 1, "a.jpg", "a-thumb.jpg", "hash-a", 101)
+    pages.create("page-2", "task-1", 2, "b.jpg", "b-thumb.jpg", "hash-b", 202)
+    pages.delete("task-1", "page-2")
+
+    with pytest.raises(ValueError):
+        pages.create(
+            "page-2-reused",
+            "task-1",
+            2,
+            "b-reused.jpg",
+            "b-reused-thumb.jpg",
+            "hash-b-reused",
+            303,
+        )
+
+
+@pytest.mark.parametrize(
+    ("original_path", "thumbnail_path"),
+    [
+        ("C:/outside.jpg", "thumbnail.jpg"),
+        ("original.jpg", "../outside-thumbnail.jpg"),
+    ],
+)
+def test_page_paths_must_be_relative_without_parent_traversal(
+    repository_bundle,
+    original_path: str,
+    thumbnail_path: str,
+):
+    tasks, pages, _ = repository_bundle
+    tasks.create("task-1", "device-1")
+
+    with pytest.raises(ValueError):
+        pages.create(
+            "page-1",
+            "task-1",
+            1,
+            original_path,
+            thumbnail_path,
+            "hash-a",
+            101,
+        )
+
+
 def test_deleting_task_cascades_to_pages(repository_bundle):
     tasks, pages, _ = repository_bundle
     tasks.create("task-1", "device-1")
