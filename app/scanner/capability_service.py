@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from numbers import Real
 from typing import Any, Protocol
 
@@ -35,6 +36,7 @@ from app.scanner.capability_codec import (
     TWTY_UINT32,
     TWTY_UINT8,
     normalize_container_type,
+    normalize_item_type,
 )
 
 
@@ -224,14 +226,24 @@ class CapabilityService:
                 source_product_name=self._source_product_name,
             )
         except Exception as exc:
-            return self._codec.error(
+            detail = str(exc) or type(exc).__name__
+            result = self._codec.error(
                 capability_id=capability_id,
                 error_code="TWAIN_CAPABILITY_QUERY_FAILED",
-                error_message=f"Capability {capability_id:#06x} 查询失败: {exc}",
+                error_message=f"Capability {capability_id:#06x} 查询失败: {detail}",
                 operations=operations,
                 source_manufacturer=self._source_manufacturer,
                 source_product_name=self._source_product_name,
             )
+            raw_container = getattr(exc, "container_type", None)
+            raw_item_type = getattr(exc, "item_type", None)
+            if raw_container is not None and raw_item_type is not None:
+                result = replace(
+                    result,
+                    container_type=normalize_container_type(raw_container),
+                    item_type=normalize_item_type(raw_item_type),
+                )
+            return result
 
     @staticmethod
     def _normalize_supported_ids(values: Sequence[Any]) -> list[int]:

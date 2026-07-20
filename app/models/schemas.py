@@ -151,6 +151,7 @@ class CapabilitySchema:
             "containerType": self.container_type,
             "itemType": self.item_type,
             "operations": self.operations.to_payload(),
+            "operationMask": self.operations.bitmask,
             "currentValue": _json_safe(self.current),
             "defaultValue": _json_safe(self.default),
             "values": _json_safe(self.values),

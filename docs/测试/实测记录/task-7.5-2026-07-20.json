@@ -1,0 +1,4804 @@
+{
+  "task": "Task 7.5",
+  "readOnly": true,
+  "physicalDevice": "KODAK i2400（Windows PnP：KODAK i2800 Scanner）",
+  "driverEntry": "kds_i2000.inf",
+  "source": {
+    "architecture": "x64",
+    "dsmArchitecture": "x64",
+    "dsmPath": "C:\\Windows\\System32\\TWAINDSM.dll",
+    "manufacturer": "Eastman Kodak",
+    "productFamily": "Document Imaging",
+    "productName": "KODAK Scanner: i2000",
+    "protocolMajor": 2,
+    "protocolMinor": 4,
+    "showUi": false,
+    "sourceIdentity": {
+      "Country": 1,
+      "Id": 1,
+      "Info": "KDS v16.1 2018/2/7",
+      "Language": 13,
+      "MajorNum": 16,
+      "Manufacturer": "Eastman Kodak",
+      "MinorNum": 1,
+      "ProductFamily": "Document Imaging",
+      "ProductName": "KODAK Scanner: i2000",
+      "ProtocolMajor": 2,
+      "ProtocolMinor": 4,
+      "SupportedGroups": 1073745923,
+      "Version": {
+        "Country": 1,
+        "Info": "KDS v16.1 2018/2/7",
+        "Language": 13,
+        "MajorNum": 16,
+        "MinorNum": 1
+      }
+    }
+  },
+  "capabilityCount": 156,
+  "capabilities": [
+    {
+      "capabilityHex": "0x0001",
+      "capabilityId": 1,
+      "capabilityName": "传输页数",
+      "containerType": "TW_ONEVALUE",
+      "currentValue": -1,
+      "custom": false,
+      "defaultValue": -1,
+      "description": "控制本次传输的页面数量",
+      "itemType": "TWTY_INT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_XFERCOUNT",
+      "values": null
+    },
+    {
+      "capabilityHex": "0x0100",
+      "capabilityId": 256,
+      "capabilityName": "压缩方式",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 6,
+      "custom": false,
+      "defaultValue": 0,
+      "description": "图像压缩方式",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "ICAP_COMPRESSION",
+      "values": [
+        0,
+        6
+      ]
+    },
+    {
+      "capabilityHex": "0x0101",
+      "capabilityId": 257,
+      "capabilityName": "像素类型",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 2,
+      "custom": false,
+      "defaultValue": 0,
+      "description": "图像颜色和像素类型",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "ICAP_PIXELTYPE",
+      "values": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "capabilityHex": "0x0102",
+      "capabilityId": 258,
+      "capabilityName": "度量单位",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "description": "图像尺寸和分辨率使用的单位",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "ICAP_UNITS",
+      "values": [
+        0,
+        1,
+        6,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "capabilityHex": "0x0103",
+      "capabilityId": 259,
+      "capabilityName": "传输机制",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "description": "图像传输机制",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "ICAP_XFERMECH",
+      "values": [
+        0,
+        1,
+        2,
+        4
+      ]
+    },
+    {
+      "capabilityHex": "0x1002",
+      "capabilityId": 4098,
+      "capabilityName": "进纸器启用",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "是否启用自动进纸器",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_FEEDERENABLED",
+      "values": [
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x1003",
+      "capabilityId": 4099,
+      "capabilityName": "进纸器有纸",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "进纸器中是否检测到纸张",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_FEEDERLOADED",
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x1004",
+      "capabilityId": 4100,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": "2026/07/20 01:46:17.750",
+      "custom": false,
+      "defaultValue": "2026/07/20 01:46:17.750",
+      "itemType": "TWTY_STR32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1005",
+      "capabilityId": 4101,
+      "capabilityName": "支持的能力",
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": [
+        1,
+        256,
+        257,
+        258,
+        259,
+        4098,
+        4099,
+        4100,
+        4101,
+        4103,
+        4107,
+        4109,
+        4110,
+        4111,
+        4112,
+        4114,
+        4115,
+        4116,
+        4117,
+        4130,
+        4132,
+        4136,
+        4140,
+        4141,
+        4148,
+        4150,
+        4151,
+        4155,
+        4156,
+        4157,
+        4158,
+        4159,
+        4160,
+        4161,
+        4162,
+        4163,
+        4164,
+        4353,
+        4355,
+        4358,
+        4361,
+        4364,
+        4368,
+        4369,
+        4370,
+        4372,
+        4374,
+        4375,
+        4376,
+        4377,
+        4378,
+        4380,
+        4383,
+        4384,
+        4385,
+        4386,
+        4387,
+        4390,
+        4391,
+        4392,
+        4395,
+        4396,
+        4397,
+        4399,
+        4400,
+        4401,
+        4404,
+        4407,
+        4408,
+        4411,
+        4423,
+        4424,
+        4425,
+        4432,
+        4433,
+        4434,
+        4435,
+        4440,
+        4441,
+        4442,
+        4444,
+        4446,
+        4449,
+        32770,
+        32771,
+        32774,
+        32775,
+        32797,
+        32798,
+        32802,
+        32803,
+        32804,
+        32807,
+        32808,
+        32809,
+        32811,
+        32812,
+        32813,
+        32814,
+        32815,
+        32817,
+        32818,
+        32854,
+        32876,
+        32878,
+        32884,
+        32888,
+        32897,
+        32902,
+        32905,
+        32908,
+        32909,
+        32914,
+        32915,
+        32916,
+        32917,
+        32918,
+        32919,
+        32920,
+        32921,
+        32922,
+        32923,
+        32924,
+        32925,
+        32926,
+        32927,
+        32940,
+        32941,
+        32942,
+        32943,
+        32944,
+        32945,
+        32946,
+        32947,
+        32948,
+        32949,
+        32950,
+        32951,
+        32952,
+        32953,
+        32954,
+        32964,
+        32965,
+        32966,
+        32967,
+        32973,
+        33024,
+        33025,
+        33026,
+        33027,
+        33028,
+        33032,
+        33033,
+        33034,
+        33035,
+        33036
+      ],
+      "description": "设备支持的 Capability 编号列表",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_SUPPORTEDCAPS",
+      "values": [
+        1,
+        256,
+        257,
+        258,
+        259,
+        4098,
+        4099,
+        4100,
+        4101,
+        4103,
+        4107,
+        4109,
+        4110,
+        4111,
+        4112,
+        4114,
+        4115,
+        4116,
+        4117,
+        4130,
+        4132,
+        4136,
+        4140,
+        4141,
+        4148,
+        4150,
+        4151,
+        4155,
+        4156,
+        4157,
+        4158,
+        4159,
+        4160,
+        4161,
+        4162,
+        4163,
+        4164,
+        4353,
+        4355,
+        4358,
+        4361,
+        4364,
+        4368,
+        4369,
+        4370,
+        4372,
+        4374,
+        4375,
+        4376,
+        4377,
+        4378,
+        4380,
+        4383,
+        4384,
+        4385,
+        4386,
+        4387,
+        4390,
+        4391,
+        4392,
+        4395,
+        4396,
+        4397,
+        4399,
+        4400,
+        4401,
+        4404,
+        4407,
+        4408,
+        4411,
+        4423,
+        4424,
+        4425,
+        4432,
+        4433,
+        4434,
+        4435,
+        4440,
+        4441,
+        4442,
+        4444,
+        4446,
+        4449,
+        32770,
+        32771,
+        32774,
+        32775,
+        32797,
+        32798,
+        32802,
+        32803,
+        32804,
+        32807,
+        32808,
+        32809,
+        32811,
+        32812,
+        32813,
+        32814,
+        32815,
+        32817,
+        32818,
+        32854,
+        32876,
+        32878,
+        32884,
+        32888,
+        32897,
+        32902,
+        32905,
+        32908,
+        32909,
+        32914,
+        32915,
+        32916,
+        32917,
+        32918,
+        32919,
+        32920,
+        32921,
+        32922,
+        32923,
+        32924,
+        32925,
+        32926,
+        32927,
+        32940,
+        32941,
+        32942,
+        32943,
+        32944,
+        32945,
+        32946,
+        32947,
+        32948,
+        32949,
+        32950,
+        32951,
+        32952,
+        32953,
+        32954,
+        32964,
+        32965,
+        32966,
+        32967,
+        32973,
+        33024,
+        33025,
+        33026,
+        33027,
+        33028,
+        33032,
+        33033,
+        33034,
+        33035,
+        33036
+      ]
+    },
+    {
+      "capabilityHex": "0x1007",
+      "capabilityId": 4103,
+      "capabilityName": "自动进纸",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "是否自动连续进纸",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_AUTOFEED",
+      "values": [
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x100B",
+      "capabilityId": 4107,
+      "capabilityName": "设备指示器",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": false,
+      "defaultValue": false,
+      "description": "是否允许设备指示器工作",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_INDICATORS",
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x100D",
+      "capabilityId": 4109,
+      "capabilityName": "纸张可检测",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "设备是否支持纸张检测",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_PAPERDETECTABLE",
+      "values": [
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x100E",
+      "capabilityId": 4110,
+      "capabilityName": "界面可控制",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "应用是否可以控制设备界面",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_UICONTROLLABLE",
+      "values": [
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x100F",
+      "capabilityId": 4111,
+      "capabilityName": "设备在线",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "设备当前是否在线",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_DEVICEONLINE",
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x1010",
+      "capabilityId": 4112,
+      "capabilityName": "自动扫描",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "是否自动开始扫描",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_AUTOSCAN",
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x1012",
+      "capabilityId": 4114,
+      "capabilityName": "双面能力",
+      "containerType": "TW_ONEVALUE",
+      "currentValue": 1,
+      "custom": false,
+      "defaultValue": 1,
+      "description": "设备是否支持双面扫描",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_DUPLEX",
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1013",
+      "capabilityId": 4115,
+      "capabilityName": "双面启用",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "是否启用双面扫描",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_DUPLEXENABLED",
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x1014",
+      "capabilityId": 4116,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x1015",
+      "capabilityId": 4117,
+      "capabilityName": "自定义设备数据",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "description": "整块保存或恢复厂商设备数据",
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_CUSTOMDSDATA",
+      "values": [
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x1022",
+      "capabilityId": 4130,
+      "capabilityName": "设备事件",
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": [],
+      "description": "设备事件通知能力",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_DEVICEEVENT",
+      "values": []
+    },
+    {
+      "capabilityHex": "0x1024",
+      "capabilityId": 4132,
+      "capabilityName": "序列号",
+      "containerType": "TW_ONEVALUE",
+      "currentValue": "51627929",
+      "custom": false,
+      "defaultValue": "abc",
+      "description": "设备序列号",
+      "itemType": "TWTY_STR255",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "CAP_SERIALNUMBER",
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1028",
+      "capabilityId": 4136,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x102C",
+      "capabilityId": 4140,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 13,
+      "custom": false,
+      "defaultValue": 13,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        37,
+        39,
+        41,
+        40,
+        42,
+        38,
+        43,
+        45,
+        1,
+        46,
+        13,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        2,
+        5,
+        56,
+        3,
+        57,
+        58,
+        6,
+        59,
+        61,
+        60,
+        62,
+        63,
+        65,
+        8,
+        67,
+        68,
+        69,
+        70,
+        75,
+        76,
+        10,
+        77,
+        78,
+        11,
+        82,
+        83,
+        85
+      ]
+    },
+    {
+      "capabilityHex": "0x102D",
+      "capabilityId": 4141,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": 2,
+      "custom": false,
+      "defaultValue": 2,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1034",
+      "capabilityId": 4148,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "capabilityHex": "0x1036",
+      "capabilityId": 4150,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x1037",
+      "capabilityId": 4151,
+      "capabilityName": null,
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": [
+        0,
+        2
+      ],
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        2
+      ]
+    },
+    {
+      "capabilityHex": "0x103B",
+      "capabilityId": 4155,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": false,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x103C",
+      "capabilityId": 4156,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": "{642881CE-9F18-448c-8FD8-F77A51E0B85A}",
+      "custom": false,
+      "defaultValue": "{642881CE-9F18-448c-8FD8-F77A51E0B85A}",
+      "itemType": "TWTY_STR255",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x103D",
+      "capabilityId": 4157,
+      "capabilityName": null,
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": [
+        256,
+        4150,
+        4353,
+        4355,
+        4358,
+        4361,
+        4372,
+        4376,
+        4377,
+        4380,
+        4383,
+        4385,
+        4387,
+        4390,
+        4391,
+        4392,
+        4395,
+        4396,
+        4407,
+        4423,
+        4424,
+        4425,
+        4432,
+        4433,
+        4434,
+        4435,
+        4441,
+        4442,
+        4449,
+        32774,
+        32775,
+        32797,
+        32802,
+        32803,
+        32804,
+        32814,
+        32884,
+        32905,
+        32914,
+        32915,
+        32916,
+        32917,
+        32918,
+        32919,
+        32920,
+        32921,
+        32923,
+        32924,
+        32925,
+        32926,
+        32940,
+        32942,
+        32943,
+        32944,
+        32945,
+        32946,
+        32947,
+        32949,
+        32950,
+        32952,
+        32953,
+        32966,
+        32967,
+        33026,
+        33027,
+        33028,
+        33032,
+        33033,
+        33034
+      ],
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        256,
+        4150,
+        4353,
+        4355,
+        4358,
+        4361,
+        4372,
+        4376,
+        4377,
+        4380,
+        4383,
+        4385,
+        4387,
+        4390,
+        4391,
+        4392,
+        4395,
+        4396,
+        4407,
+        4423,
+        4424,
+        4425,
+        4432,
+        4433,
+        4434,
+        4435,
+        4441,
+        4442,
+        4449,
+        32774,
+        32775,
+        32797,
+        32802,
+        32803,
+        32804,
+        32814,
+        32884,
+        32905,
+        32914,
+        32915,
+        32916,
+        32917,
+        32918,
+        32919,
+        32920,
+        32921,
+        32923,
+        32924,
+        32925,
+        32926,
+        32940,
+        32942,
+        32943,
+        32944,
+        32945,
+        32946,
+        32947,
+        32949,
+        32950,
+        32952,
+        32953,
+        32966,
+        32967,
+        33026,
+        33027,
+        33028,
+        33032,
+        33033,
+        33034
+      ]
+    },
+    {
+      "capabilityHex": "0x103E",
+      "capabilityId": 4158,
+      "capabilityName": null,
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": [
+        65537,
+        65538,
+        65539,
+        65540,
+        65541,
+        65542,
+        65543,
+        65544,
+        65545,
+        65546,
+        65548,
+        65549,
+        65550,
+        65551,
+        65552,
+        65554,
+        131329,
+        131330,
+        131331,
+        131332,
+        131333,
+        131339,
+        132098,
+        66563,
+        268468225,
+        268468229,
+        268468230,
+        268468231,
+        268468232,
+        268468233,
+        268468234,
+        268468236,
+        268468237,
+        268468238,
+        268468240
+      ],
+      "itemType": "TWTY_UINT32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        65537,
+        65538,
+        65539,
+        65540,
+        65541,
+        65542,
+        65543,
+        65544,
+        65545,
+        65546,
+        65548,
+        65549,
+        65550,
+        65551,
+        65552,
+        65554,
+        131329,
+        131330,
+        131331,
+        131332,
+        131333,
+        131339,
+        132098,
+        66563,
+        268468225,
+        268468229,
+        268468230,
+        268468231,
+        268468232,
+        268468233,
+        268468234,
+        268468236,
+        268468237,
+        268468238,
+        268468240
+      ]
+    },
+    {
+      "capabilityHex": "0x103F",
+      "capabilityId": 4159,
+      "capabilityName": null,
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": [],
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": []
+    },
+    {
+      "capabilityHex": "0x1040",
+      "capabilityId": 4160,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0.0,
+      "custom": false,
+      "defaultValue": 0.0,
+      "itemType": "TWTY_FIX32",
+      "maximum": 160.0,
+      "minimum": 0.0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 0.0099945068359375,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1041",
+      "capabilityId": 4161,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "capabilityHex": "0x1042",
+      "capabilityId": 4162,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1042 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1043",
+      "capabilityId": 4163,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1043 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1044",
+      "capabilityId": 4164,
+      "capabilityName": null,
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        1,
+        3
+      ]
+    },
+    {
+      "capabilityHex": "0x1101",
+      "capabilityId": 4353,
+      "capabilityName": "亮度",
+      "containerType": "TW_RANGE",
+      "currentValue": 0.0,
+      "custom": false,
+      "defaultValue": 0.0,
+      "description": "图像亮度",
+      "itemType": "TWTY_FIX32",
+      "maximum": 1000.0,
+      "minimum": -1000.0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "ICAP_BRIGHTNESS",
+      "step": 20.0,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1103",
+      "capabilityId": 4355,
+      "capabilityName": "对比度",
+      "containerType": "TW_RANGE",
+      "currentValue": 0.0,
+      "custom": false,
+      "defaultValue": 0.0,
+      "description": "图像对比度",
+      "itemType": "TWTY_FIX32",
+      "maximum": 1000.0,
+      "minimum": -1000.0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "ICAP_CONTRAST",
+      "step": 20.0,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1106",
+      "capabilityId": 4358,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1106 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1109",
+      "capabilityId": 4361,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1109 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x110C",
+      "capabilityId": 4364,
+      "capabilityName": "图像文件格式",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "description": "文件传输时的图像格式",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "ICAP_IMAGEFILEFORMAT",
+      "values": [
+        0,
+        2,
+        32770,
+        4
+      ]
+    },
+    {
+      "capabilityHex": "0x1110",
+      "capabilityId": 4368,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        3
+      ]
+    },
+    {
+      "capabilityHex": "0x1111",
+      "capabilityId": 4369,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": 8.5,
+      "custom": false,
+      "defaultValue": 8.5,
+      "itemType": "TWTY_FIX32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1112",
+      "capabilityId": 4370,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": 14.0,
+      "custom": false,
+      "defaultValue": 14.0,
+      "itemType": "TWTY_FIX32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1114",
+      "capabilityId": 4372,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": [
+        0.0,
+        0.0,
+        8.259994506835938,
+        11.689987182617188
+      ],
+      "custom": false,
+      "defaultValue": [
+        0.0,
+        0.0,
+        8.259994506835938,
+        11.689987182617188
+      ],
+      "itemType": "TWTY_FRAME",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        [
+          0.0,
+          0.0,
+          8.259994506835938,
+          11.689987182617188
+        ]
+      ]
+    },
+    {
+      "capabilityHex": "0x1116",
+      "capabilityId": 4374,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 600.0,
+      "custom": false,
+      "defaultValue": 600.0,
+      "itemType": "TWTY_FIX32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        600.0
+      ]
+    },
+    {
+      "capabilityHex": "0x1117",
+      "capabilityId": 4375,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 600.0,
+      "custom": false,
+      "defaultValue": 600.0,
+      "itemType": "TWTY_FIX32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        600.0
+      ]
+    },
+    {
+      "capabilityHex": "0x1118",
+      "capabilityId": 4376,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 200.0,
+      "custom": false,
+      "defaultValue": 200.0,
+      "itemType": "TWTY_FIX32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        75.0,
+        100.0,
+        150.0,
+        200.0,
+        240.0,
+        250.0,
+        260.0,
+        300.0,
+        400.0,
+        500.0,
+        600.0,
+        1200.0
+      ]
+    },
+    {
+      "capabilityHex": "0x1119",
+      "capabilityId": 4377,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 200.0,
+      "custom": false,
+      "defaultValue": 200.0,
+      "itemType": "TWTY_FIX32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        75.0,
+        100.0,
+        150.0,
+        200.0,
+        240.0,
+        250.0,
+        260.0,
+        300.0,
+        400.0,
+        500.0,
+        600.0,
+        1200.0
+      ]
+    },
+    {
+      "capabilityHex": "0x111A",
+      "capabilityId": 4378,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": 1,
+      "custom": false,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x111C",
+      "capabilityId": 4380,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 1,
+      "custom": false,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        1
+      ]
+    },
+    {
+      "capabilityHex": "0x111F",
+      "capabilityId": 4383,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        1
+      ]
+    },
+    {
+      "capabilityHex": "0x1120",
+      "capabilityId": 4384,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x1121",
+      "capabilityId": 4385,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0.0,
+      "custom": false,
+      "defaultValue": 0.0,
+      "itemType": "TWTY_FIX32",
+      "maximum": 270.0,
+      "minimum": 0.0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 90.0,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1122",
+      "capabilityId": 4386,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 1,
+      "custom": false,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        4,
+        3,
+        10,
+        52,
+        1,
+        5,
+        13,
+        22,
+        29,
+        7,
+        30,
+        2,
+        39,
+        40,
+        41,
+        15,
+        16,
+        48
+      ]
+    },
+    {
+      "capabilityHex": "0x1123",
+      "capabilityId": 4387,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1123 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1126",
+      "capabilityId": 4390,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x1127",
+      "capabilityId": 4391,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1127 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1128",
+      "capabilityId": 4392,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 6,
+      "custom": false,
+      "defaultValue": 6,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        6
+      ]
+    },
+    {
+      "capabilityHex": "0x112B",
+      "capabilityId": 4395,
+      "capabilityName": "位深度",
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 24,
+      "custom": false,
+      "defaultValue": 24,
+      "description": "每像素的位数",
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "standardCode": "ICAP_BITDEPTH",
+      "values": [
+        24
+      ]
+    },
+    {
+      "capabilityHex": "0x112C",
+      "capabilityId": 4396,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x112c 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x112D",
+      "capabilityId": 4397,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": false,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x112F",
+      "capabilityId": 4399,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x1130",
+      "capabilityId": 4400,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": 1.0,
+      "custom": false,
+      "defaultValue": 1.0,
+      "itemType": "TWTY_FIX32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1131",
+      "capabilityId": 4401,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": 1.0,
+      "custom": false,
+      "defaultValue": 1.0,
+      "itemType": "TWTY_FIX32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1134",
+      "capabilityId": 4404,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": -2,
+      "custom": false,
+      "defaultValue": -2,
+      "itemType": "TWTY_INT32",
+      "maximum": -1,
+      "minimum": -2,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1137",
+      "capabilityId": 4407,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": false,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x1138",
+      "capabilityId": 4408,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1138 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x113B",
+      "capabilityId": 4411,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x113b 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1147",
+      "capabilityId": 4423,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1147 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1148",
+      "capabilityId": 4424,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x1148 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x1149",
+      "capabilityId": 4425,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        4
+      ]
+    },
+    {
+      "capabilityHex": "0x1150",
+      "capabilityId": 4432,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x1151",
+      "capabilityId": 4433,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x1152",
+      "capabilityId": 4434,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x1153",
+      "capabilityId": 4435,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 50,
+      "custom": false,
+      "defaultValue": 50,
+      "itemType": "TWTY_INT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        40,
+        50,
+        80,
+        90,
+        100
+      ]
+    },
+    {
+      "capabilityHex": "0x1158",
+      "capabilityId": 4440,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": false,
+      "defaultValue": true,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x1159",
+      "capabilityId": 4441,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": false,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x115A",
+      "capabilityId": 4442,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x115C",
+      "capabilityId": 4444,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": false,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "capabilityHex": "0x115E",
+      "capabilityId": 4446,
+      "capabilityName": null,
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": false,
+      "defaultValue": [
+        4651,
+        4652,
+        4666,
+        4667,
+        4668,
+        4669,
+        4670,
+        4671,
+        4677,
+        4678,
+        4679,
+        4681,
+        32769,
+        32770,
+        32771,
+        32774,
+        32775,
+        32776,
+        32777,
+        32778,
+        32780,
+        32781,
+        32786,
+        32787,
+        32791,
+        32792,
+        32793,
+        32799,
+        32800,
+        32818,
+        32823,
+        32824,
+        32825,
+        32826,
+        32827,
+        32828,
+        32831,
+        32832,
+        32833,
+        32834,
+        32835
+      ],
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        4651,
+        4652,
+        4666,
+        4667,
+        4668,
+        4669,
+        4670,
+        4671,
+        4677,
+        4678,
+        4679,
+        4681,
+        32769,
+        32770,
+        32771,
+        32774,
+        32775,
+        32776,
+        32777,
+        32778,
+        32780,
+        32781,
+        32786,
+        32787,
+        32791,
+        32792,
+        32793,
+        32799,
+        32800,
+        32818,
+        32823,
+        32824,
+        32825,
+        32826,
+        32827,
+        32828,
+        32831,
+        32832,
+        32833,
+        32834,
+        32835
+      ]
+    },
+    {
+      "capabilityHex": "0x1161",
+      "capabilityId": 4449,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 2,
+      "custom": false,
+      "defaultValue": 2,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        2
+      ]
+    },
+    {
+      "capabilityHex": "0x8002",
+      "capabilityId": 32770,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0.0,
+      "custom": true,
+      "defaultValue": 0.0,
+      "itemType": "TWTY_FIX32",
+      "maximum": 160.0,
+      "minimum": 0.0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 0.0099945068359375,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8003",
+      "capabilityId": 32771,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 1,
+      "custom": true,
+      "defaultValue": 1,
+      "itemType": "TWTY_INT32",
+      "maximum": 120,
+      "minimum": 0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8006",
+      "capabilityId": 32774,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8006 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8007",
+      "capabilityId": 32775,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8007 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x801D",
+      "capabilityId": 32797,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x801E",
+      "capabilityId": 32798,
+      "capabilityName": null,
+      "containerType": "TW_ARRAY",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": [
+        0,
+        6
+      ],
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        6
+      ]
+    },
+    {
+      "capabilityHex": "0x8022",
+      "capabilityId": 32802,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "capabilityHex": "0x8023",
+      "capabilityId": 32803,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x8024",
+      "capabilityId": 32804,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8024 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8027",
+      "capabilityId": 32807,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "capabilityHex": "0x8028",
+      "capabilityId": 32808,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 1,
+      "custom": true,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        1
+      ]
+    },
+    {
+      "capabilityHex": "0x8029",
+      "capabilityId": 32809,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": true,
+      "defaultValue": true,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x802B",
+      "capabilityId": 32811,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x802b 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x802C",
+      "capabilityId": 32812,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 1,
+      "custom": true,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        1
+      ]
+    },
+    {
+      "capabilityHex": "0x802D",
+      "capabilityId": 32813,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x802d 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x802E",
+      "capabilityId": 32814,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x802F",
+      "capabilityId": 32815,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 15,
+      "custom": true,
+      "defaultValue": 15,
+      "itemType": "TWTY_INT32",
+      "maximum": 240,
+      "minimum": 1,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8031",
+      "capabilityId": 32817,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_INT16",
+      "maximum": 32767,
+      "minimum": 0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8032",
+      "capabilityId": 32818,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x8056",
+      "capabilityId": 32854,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8056 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x806C",
+      "capabilityId": 32876,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x806E",
+      "capabilityId": 32878,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x806e 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8074",
+      "capabilityId": 32884,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": true,
+      "defaultValue": true,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x8078",
+      "capabilityId": 32888,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8078 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8081",
+      "capabilityId": 32897,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8081 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8086",
+      "capabilityId": 32902,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_INT32",
+      "maximum": 32767,
+      "minimum": 0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8089",
+      "capabilityId": 32905,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x808C",
+      "capabilityId": 32908,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x808D",
+      "capabilityId": 32909,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x8092",
+      "capabilityId": 32914,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8092 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8093",
+      "capabilityId": 32915,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "capabilityHex": "0x8094",
+      "capabilityId": 32916,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8094 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8095",
+      "capabilityId": 32917,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 3,
+      "custom": true,
+      "defaultValue": 3,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        3,
+        4,
+        1,
+        2
+      ]
+    },
+    {
+      "capabilityHex": "0x8096",
+      "capabilityId": 32918,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8096 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8097",
+      "capabilityId": 32919,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8097 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8098",
+      "capabilityId": 32920,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8098 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8099",
+      "capabilityId": 32921,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x8099 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x809A",
+      "capabilityId": 32922,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 1,
+      "custom": true,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        1
+      ]
+    },
+    {
+      "capabilityHex": "0x809B",
+      "capabilityId": 32923,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 1,
+      "custom": true,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        1,
+        2,
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x809C",
+      "capabilityId": 32924,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT32",
+      "maximum": 1024000,
+      "minimum": 0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1024,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x809D",
+      "capabilityId": 32925,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT32",
+      "maximum": 1024000,
+      "minimum": 0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1024,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x809E",
+      "capabilityId": 32926,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT32",
+      "maximum": 1024000,
+      "minimum": 0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1024,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x809F",
+      "capabilityId": 32927,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 3,
+      "custom": true,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        65535,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "capabilityHex": "0x80AC",
+      "capabilityId": 32940,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 1,
+      "custom": true,
+      "defaultValue": 1,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        1,
+        3,
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x80AD",
+      "capabilityId": 32941,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0
+      ]
+    },
+    {
+      "capabilityHex": "0x80AE",
+      "capabilityId": 32942,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        3,
+        1
+      ]
+    },
+    {
+      "capabilityHex": "0x80AF",
+      "capabilityId": 32943,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x80af 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80B0",
+      "capabilityId": 32944,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x80b0 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80B1",
+      "capabilityId": 32945,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_INT32",
+      "maximum": 1000,
+      "minimum": -1000,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 20,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80B2",
+      "capabilityId": 32946,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_INT32",
+      "maximum": 1000,
+      "minimum": -1000,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 20,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80B3",
+      "capabilityId": 32947,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_INT32",
+      "maximum": 1000,
+      "minimum": -1000,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 20,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80B4",
+      "capabilityId": 32948,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 2,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        2,
+        1,
+        3
+      ]
+    },
+    {
+      "capabilityHex": "0x80B5",
+      "capabilityId": 32949,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_INT32",
+      "maximum": 3600000,
+      "minimum": -3600000,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80B6",
+      "capabilityId": 32950,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 3,
+      "custom": true,
+      "defaultValue": 3,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        3,
+        4,
+        1,
+        0,
+        2
+      ]
+    },
+    {
+      "capabilityHex": "0x80B7",
+      "capabilityId": 32951,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x80B8",
+      "capabilityId": 32952,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x80b8 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80B9",
+      "capabilityId": 32953,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x80b9 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80BA",
+      "capabilityId": 32954,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x80ba 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80C4",
+      "capabilityId": 32964,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x80c4 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80C5",
+      "capabilityId": 32965,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "capabilityHex": "0x80C6",
+      "capabilityId": 32966,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": true,
+      "defaultValue": true,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x80C7",
+      "capabilityId": 32967,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_INT32",
+      "maximum": 2,
+      "minimum": -2,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x80CD",
+      "capabilityId": 32973,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": "",
+      "custom": true,
+      "defaultValue": "",
+      "itemType": "TWTY_STR32",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8100",
+      "capabilityId": 33024,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        true,
+        false
+      ]
+    },
+    {
+      "capabilityHex": "0x8101",
+      "capabilityId": 33025,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 14.0,
+      "custom": true,
+      "defaultValue": 14.0,
+      "itemType": "TWTY_FIX32",
+      "maximum": 160.0,
+      "minimum": 2.5,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 0.0099945068359375,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8102",
+      "capabilityId": 33026,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 1,
+      "custom": true,
+      "defaultValue": 1,
+      "itemType": "TWTY_INT32",
+      "maximum": 3,
+      "minimum": 0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8103",
+      "capabilityId": 33027,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 0,
+      "custom": true,
+      "defaultValue": 0,
+      "itemType": "TWTY_INT32",
+      "maximum": 10,
+      "minimum": -10,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    },
+    {
+      "capabilityHex": "0x8104",
+      "capabilityId": 33028,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": true,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x8108",
+      "capabilityId": 33032,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 2,
+      "custom": true,
+      "defaultValue": 2,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        2,
+        1
+      ]
+    },
+    {
+      "capabilityHex": "0x8109",
+      "capabilityId": 33033,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": 2,
+      "custom": true,
+      "defaultValue": 2,
+      "itemType": "TWTY_UINT16",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        0,
+        2,
+        3,
+        1
+      ]
+    },
+    {
+      "capabilityHex": "0x810A",
+      "capabilityId": 33034,
+      "capabilityName": null,
+      "containerType": "TW_ONEVALUE",
+      "currentValue": null,
+      "custom": true,
+      "defaultValue": null,
+      "itemType": "TWTY_UNKNOWN",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "queryError": "TWAIN_CAPABILITY_QUERY_FAILED",
+      "queryErrorMessage": "Capability 0x810a 查询失败: BadCapability",
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": null
+    },
+    {
+      "capabilityHex": "0x810B",
+      "capabilityId": 33035,
+      "capabilityName": null,
+      "containerType": "TW_ENUMERATION",
+      "currentValue": false,
+      "custom": true,
+      "defaultValue": false,
+      "itemType": "TWTY_BOOL",
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "values": [
+        false,
+        true
+      ]
+    },
+    {
+      "capabilityHex": "0x810C",
+      "capabilityId": 33036,
+      "capabilityName": null,
+      "containerType": "TW_RANGE",
+      "currentValue": 60,
+      "custom": true,
+      "defaultValue": 60,
+      "itemType": "TWTY_INT32",
+      "maximum": 240,
+      "minimum": 0,
+      "operationMask": 5,
+      "operations": {
+        "get": true,
+        "getCurrent": false,
+        "getDefault": true,
+        "reset": false,
+        "set": false
+      },
+      "source": {
+        "manufacturer": "Eastman Kodak",
+        "productName": "KODAK Scanner: i2000"
+      },
+      "step": 1,
+      "values": null
+    }
+  ]
+}
