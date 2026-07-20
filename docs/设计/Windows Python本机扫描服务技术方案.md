@@ -1073,6 +1073,14 @@ ADF无纸属于正常结束，不作为错误返回。
 - 支持 `TWSX_FILE + JPEG/JFIF`。
 - Capability设置后能够读取实际生效值。
 
+#### 23.1.1 早期真实 Capability 冒烟探测
+
+在 Task 7 的 Fake Source 自动化验证完成后、Task 8 文件传输开发前，增加一次真实设备只读冒烟探测。探测必须使用实际 KODAK i2400、`kds_i2000.inf` 和 `KODAK Scanner: i2000` Data Source，并在 TWAIN 工作进程内以 `show_ui=False` 完成。
+
+探测顺序固定为：读取 `CAP_SUPPORTEDCAPS`；逐项读取 `MSG_QUERYSUPPORT` 操作位；按支持位读取当前值和默认值；保留标准/私有 Capability 编号、容器类型、原始 Item 类型、原始值和单项错误；最后关闭 Data Source。该步骤不做 Capability 设置、不启动扫描，仅用于尽早确认真实驱动与 Task 7 规则的兼容性。探测失败时必须保留真实结果并暂停 Task 8，不能等到 Task 14 才首次发现基础 Capability 不兼容。
+
+该冒烟探测不替代 Task 14。Task 14 仍需重新执行完整 Capability 查询，并继续验证设置回读、图像传输、数百页任务、异常恢复和联调。
+
 至少验证：
 
 ```text
