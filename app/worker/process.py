@@ -8,6 +8,7 @@ from queue import Empty
 import time
 from typing import Any, Callable, Protocol
 
+from app.models.schemas import CapabilitySchema
 from app.scanner.twain_backend import TwainBackend, TwainBackendError, TwainDevice
 from app.scanner.protocol import CommandType
 from app.worker.messages import (
@@ -27,6 +28,20 @@ class WorkerRuntime(Protocol):
     def enumerate_devices(self) -> list[TwainDevice]:
         """枚举当前工作进程可见的 TWAIN Data Source。"""
 
+    def open_source(
+        self,
+        product_name: str,
+        *,
+        show_ui: bool = False,
+    ) -> dict[str, Any]:
+        """无界面打开一个 TWAIN Data Source。"""
+
+    def query_capabilities(self) -> list[CapabilitySchema]:
+        """查询当前打开 Data Source 的全部 Capability。"""
+
+    def close_source(self) -> None:
+        """关闭当前打开的 TWAIN Data Source。"""
+
     def close(self) -> None:
         """释放工作进程内的 TWAIN 资源。"""
 
@@ -36,6 +51,23 @@ class NoopWorkerRuntime:
 
     def enumerate_devices(self) -> list[TwainDevice]:
         return []
+
+    def open_source(
+        self,
+        product_name: str,
+        *,
+        show_ui: bool = False,
+    ) -> dict[str, Any]:
+        raise TwainBackendError("TWAIN_SOURCE_NOT_FOUND", "测试运行时没有 TWAIN Data Source")
+
+    def query_capabilities(self) -> list[CapabilitySchema]:
+        raise TwainBackendError(
+            "TWAIN_SOURCE_NOT_OPEN",
+            "测试运行时没有打开 TWAIN Data Source",
+        )
+
+    def close_source(self) -> None:
+        return None
 
     def close(self) -> None:
         return None
@@ -51,6 +83,25 @@ class TwainRuntime:
         if self._backend is None:
             raise RuntimeError("TWAIN 后端已经关闭")
         return self._backend.enumerate_devices()
+
+    def open_source(
+        self,
+        product_name: str,
+        *,
+        show_ui: bool = False,
+    ) -> dict[str, Any]:
+        if self._backend is None:
+            raise RuntimeError("TWAIN 后端已经关闭")
+        return self._backend.open_source(product_name, show_ui=show_ui)
+
+    def query_capabilities(self) -> list[CapabilitySchema]:
+        if self._backend is None:
+            raise RuntimeError("TWAIN 后端已经关闭")
+        return self._backend.query_capabilities()
+
+    def close_source(self) -> None:
+        if self._backend is not None:
+            self._backend.close_source()
 
     def close(self) -> None:
         backend = self._backend
@@ -181,6 +232,85 @@ def _handle_command(
             payload={"count": len(devices)},
         )
         return active_scan, False
+
+    if command.message_type in {
+        CommandType.OPEN_SOURCE.value,
+        CommandType.QUERY_CAPABILITIES.value,
+        CommandType.CLOSE_SOURCE.value,
+    }:
+        if active_scan is not None:
+            _command_failed(
+                event_queue,
+                command,
+                error_code="SCANNER_BUSY",
+                error_message="扫描期间不能操作 Data Source 或查询 Capability",
+            )
+            return active_scan, False
+        try:
+            if command.message_type == CommandType.OPEN_SOURCE.value:
+                product_name = command.payload.get("productName")
+                show_ui = command.payload.get("showUi", False)
+                if not isinstance(product_name, str) or not product_name:
+                    raise TwainBackendError(
+                        "TWAIN_SOURCE_NOT_FOUND",
+                        "Data Source 产品名不能为空",
+                    )
+                if show_ui is not False:
+                    raise TwainBackendError(
+                        "TWAIN_UI_FORBIDDEN",
+                        "Capability 冒烟探测禁止打开厂商界面",
+                    )
+                source_payload = runtime.open_source(
+                    product_name,
+                    show_ui=False,
+                )
+                _command_succeeded(
+                    event_queue,
+                    command,
+                    payload=source_payload,
+                )
+                return active_scan, False
+
+            if command.message_type == CommandType.QUERY_CAPABILITIES.value:
+                capabilities = runtime.query_capabilities()
+                payload = {
+                    "count": len(capabilities),
+                    "capabilities": [item.to_payload() for item in capabilities],
+                }
+                _emit(
+                    event_queue,
+                    EventMessage(
+                        event_type="capabilities_queried",
+                        command_id=command.command_id,
+                        payload=payload,
+                    ),
+                )
+                _command_succeeded(
+                    event_queue,
+                    command,
+                    payload={"count": len(capabilities)},
+                )
+                return active_scan, False
+
+            runtime.close_source()
+            _command_succeeded(event_queue, command)
+            return active_scan, False
+        except TwainBackendError as exc:
+            _command_failed(
+                event_queue,
+                command,
+                error_code=exc.error_code,
+                error_message=str(exc),
+            )
+            return active_scan, False
+        except Exception:
+            _command_failed(
+                event_queue,
+                command,
+                error_code="TWAIN_CAPABILITY_QUERY_FAILED",
+                error_message="TWAIN Data Source Capability 操作失败",
+            )
+            return active_scan, False
 
     if command.message_type == CommandType.SHUTDOWN.value:
         _command_succeeded(event_queue, command)
