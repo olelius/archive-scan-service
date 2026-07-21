@@ -26,6 +26,14 @@ def _optional_text(value: str | None) -> str | None:
 class TaskRepository:
     """提供任务记录的事务读写操作。"""
 
+    _ACTIVE_STATUS_VALUES = (TaskStatus.SCANNING.value, TaskStatus.STOPPING.value)
+    _RESUMABLE_STATUS_VALUES = (
+        TaskStatus.CREATED.value,
+        TaskStatus.STOPPED.value,
+        TaskStatus.FAILED.value,
+        TaskStatus.COMPLETED.value,
+    )
+
     def __init__(self, database: Database) -> None:
         self._database = database
 
@@ -84,6 +92,83 @@ class TaskRepository:
             "SELECT * FROM scan_task ORDER BY created_at, task_id"
         ).fetchall()
         return [self._row_to_record(row) for row in rows]
+
+    def get_active(self) -> ScanTaskRecord | None:
+        """返回当前处于扫描或停止中的任务。"""
+
+        placeholders = ", ".join("?" for _ in self._ACTIVE_STATUS_VALUES)
+        row = self._database.connection.execute(
+            f"""
+            SELECT *
+            FROM scan_task
+            WHERE status IN ({placeholders})
+            ORDER BY updated_at, task_id
+            LIMIT 1
+            """,
+            self._ACTIVE_STATUS_VALUES,
+        ).fetchone()
+        return self._row_to_record(row) if row is not None else None
+
+    def claim_scan(
+        self,
+        task_id: str,
+        *,
+        scan_params_snapshot_json: str | None = None,
+    ) -> ScanTaskRecord | None:
+        """在立即事务中抢占扫描资格并将任务置为 `SCANNING`。
+
+        返回 ``None`` 表示已有其他活动任务；目标任务不存在时抛出 ``KeyError``，
+        目标任务不在可开始状态时抛出 ``ValueError``。
+        """
+
+        placeholders = ", ".join("?" for _ in self._ACTIVE_STATUS_VALUES)
+        with self._database.transaction() as connection:
+            task_row = connection.execute(
+                "SELECT status FROM scan_task WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            if task_row is None:
+                raise KeyError(f"任务不存在：{task_id}")
+            if task_row["status"] not in self._RESUMABLE_STATUS_VALUES:
+                raise ValueError(
+                    f"任务 {task_id} 当前状态 {task_row['status']} 不允许开始扫描"
+                )
+
+            active_row = connection.execute(
+                f"""
+                SELECT task_id
+                FROM scan_task
+                WHERE status IN ({placeholders})
+                ORDER BY updated_at, task_id
+                LIMIT 1
+                """,
+                self._ACTIVE_STATUS_VALUES,
+            ).fetchone()
+            if active_row is not None and active_row["task_id"] != task_id:
+                return None
+
+            timestamp = _utc_now()
+            connection.execute(
+                """
+                UPDATE scan_task
+                SET status = ?,
+                    scan_params_snapshot_json = ?,
+                    error_code = NULL,
+                    error_message = NULL,
+                    updated_at = ?
+                WHERE task_id = ?
+                """,
+                (
+                    TaskStatus.SCANNING.value,
+                    scan_params_snapshot_json,
+                    timestamp,
+                    task_id,
+                ),
+            )
+        record = self.get(task_id)
+        if record is None:
+            raise RuntimeError(f"任务 {task_id} 抢占后无法读取")
+        return record
 
     def update_status(
         self,
