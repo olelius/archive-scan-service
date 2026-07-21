@@ -42,7 +42,7 @@ ICAP_COMPRESSION
 ICAP_JPEGQUALITY
 ```
 
-验证查询、容器、Item类型、允许值、当前值、默认值、设置结果和最终生效值。
+验证查询、容器、Item类型、允许值、当前值、默认值、设置结果；设备支持 `MSG_GETCURRENT` 时验证最终生效值，不支持时记录 `readbackUnavailable`，不把缺少回读单独判定为设置失败。
 
 ### 3.1 Task 7.5 真实 Capability 冒烟探测
 
@@ -53,7 +53,7 @@ Task 7.5 是 Task 8 文件传输开发前的只读真机前置关卡，不替代
 1. 在 TWAIN 工作进程内以 `show_ui=False` 打开目标 Data Source，确认 DSM、Data Source 和进程均为 64 位。
 2. 读取 `CAP_SUPPORTEDCAPS`，确认返回的 Capability 列表可遍历。
 3. 对每个 Capability 调用 `MSG_QUERYSUPPORT`，记录 `TWQC_GET`、`TWQC_GETCURRENT`、`TWQC_GETDEFAULT` 和 `TWQC_SET` 操作位。
-4. 按支持位读取当前值和默认值，保留 Capability 编号、标准/私有标识、容器类型、原始 Item 类型、原始值及单项 `queryError`。
+4. 按可用消息读取当前值和默认值，保留 Capability 编号、标准/私有标识、容器类型、原始 Item 类型、原始值、操作位及单项 `queryError`；操作位不作为 Task 8 固定配置设置的唯一门槛。
 5. 关闭 Data Source，确认查询过程无崩溃、挂起、厂商界面弹出或资源未释放。
 
 本步骤只做 Capability 只读查询，不执行任意 Capability 设置、不启动扫描、不验证 JPEG 文件传输。未设置 `RUN_TWAIN_CAPABILITY_MANUAL=1` 时的自动跳过不能记为通过；真实输出必须保存 DSM 路径、Data Source 身份、驱动入口、Capability 数量和逐项查询结果。探测失败时保留原始结果并暂停 Task 8，不得标记为驱动兼容通过。
@@ -66,8 +66,13 @@ Task 7.5 是 Task 8 文件传输开发前的只读真机前置关卡，不替代
 - 驱动入口：`kds_i2000.inf`；当前物理设备记录为 KODAK i2400，Windows PnP 名称显示为 `KODAK i2800 Scanner`。
 - 工作进程以 `show_ui=False` 打开 Data Source，完成 Capability 查询后正常关闭；未执行 Capability 设置、图像扫描或文件传输。
 - `CAP_SUPPORTEDCAPS` 返回并遍历 156 项：`TW_ONEVALUE` 46 项、`TW_ENUMERATION` 79 项、`TW_RANGE` 22 项、`TW_ARRAY` 9 项；记录了每项编号、操作位、容器类型、Item 类型、当前值、默认值和 `queryError`。
+- 156 项的 `MSG_QUERYSUPPORT` 记录均为 `set=false`、`getCurrent=false`、`reset=false`，同时保留 `get` 和 `getDefault` 结果；该操作位结果不阻断固定业务配置字段或 Task 8 文件传输。
 - 其中 33 项由驱动返回 `BadCapability`，均保留为逐项 `queryError`，没有中断其他 Capability 查询；该结果不等同于设置兼容性或正式扫描验收通过。
 - 逐项记录：[task-7.5-2026-07-20.json](实测记录/task-7.5-2026-07-20.json)。
+
+### 3.3 固定业务配置与 Capability 快照
+
+前端使用固定业务配置字段，不根据 156 项 Capability 动态生成配置表。后端通过标准 Capability 名称/编号映射固定字段，并使用 Capability 快照中的候选值、范围、当前值、默认值和查询错误进行校验。设置以 `MSG_SET` 返回状态为准；支持 `MSG_GETCURRENT` 时回读，不支持时记录 `readbackUnavailable`，实际文件传输结果作为设置链路的补充证据。
 
 ## 4. 单面压力测试
 

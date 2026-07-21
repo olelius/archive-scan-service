@@ -24,7 +24,7 @@ TWAIN状态转换必须明确记录，不允许跨状态调用。打开DSM、打
 
 - 先查询 `CAP_SUPPORTEDCAPS`。
 - 对每个 Capability查询 `MSG_QUERYSUPPORT`。
-- 根据操作位决定是否执行 `GET`、`GETCURRENT`和`GETDEFAULT`。
+- 按操作位执行可用的 `GET`、`GETCURRENT` 和 `GETDEFAULT`；操作位必须原样保存，但不能单独作为前端固定配置字段的显示或设置门槛。
 - 支持全部标准容器和已确认Item类型。
 - 解析失败时保留 Capability编号并返回该项错误，不中断全部查询。
 - 私有 Capability必须同时记录设备厂商和产品名，不能只按编号映射。
@@ -32,11 +32,11 @@ TWAIN状态转换必须明确记录，不允许跨状态调用。打开DSM、打
 ## 5. Capability设置
 
 - 只能设置本次设备会话查询到的 Capability。
-- 只允许设置支持 `TWQC_SET` 的项。
+- 设置前必须通过 Item 类型、枚举集合或范围边界校验；`TWQC_SET` 操作位作为查询结果保留，不作为固定配置设置的唯一拒绝条件。
 - 枚举值必须来自驱动返回集合。
 - 范围值必须符合边界和步长。
 - 保留原始Item类型。
-- 设置后必须调用 `MSG_GETCURRENT`。
+- `MSG_SET` 返回状态作为设置结果；设备支持 `MSG_GETCURRENT` 时必须回读，设备不支持时记录 `readbackUnavailable`。
 - `TWRC_CHECKSTATUS`不能当作普通成功忽略，必须读取最终值。
 - 标准参数按照来源、单双面、颜色位深、纸张、分辨率、JPEG质量、增强、私有参数的顺序设置。
 

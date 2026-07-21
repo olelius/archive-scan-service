@@ -51,7 +51,13 @@ GET  /api/v1/devices/{deviceId}/capabilities
 POST /api/v1/devices/{deviceId}/capabilities/resolve
 ```
 
-`resolve`只用于按上游选择重新计算依赖 Capability，不开始扫描。
+`GET /capabilities` 返回当前设备全部标准和私有 Capability 快照，不按 `operations.set` 过滤。快照用于向前端提供标准名称、当前值、默认值、候选值、范围、容器类型、Item 类型和逐项查询错误。
+
+前端配置项采用固定业务字段，后端维护业务字段到标准 Capability 名称/编号的映射；Capability 快照只负责填充设备支持状态和参数约束，不负责动态生成全部配置字段。
+
+`resolve` 只用于按固定配置字段的上游选择重新计算依赖 Capability，不开始扫描。
+
+设置请求必须校验 Capability 存在、Item 类型、枚举集合或范围边界后再调用 `MSG_SET`。`TWQC_SET` 操作位作为诊断信息保留，不作为固定配置设置的唯一拒绝条件；设备支持 `MSG_GETCURRENT` 时返回实际值，不支持时返回 `readbackUnavailable`。
 
 ## 5. 任务接口
 

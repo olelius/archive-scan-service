@@ -125,6 +125,7 @@ TWAIN工作子进程负责：
 - 打开用户选择的设备。
 - 查询全部标准和厂商私有 Capability。
 - 接收主进程命令并设置 Capability。
+- 按固定业务配置字段向主进程提供 Capability 候选值、范围、当前值、默认值和查询错误。
 - 使用 `show_ui=False` 启用 Data Source。
 - 运行 TWAIN消息循环。
 - 通过 `TWSX_FILE`让驱动直接写入单页 JPEG。
@@ -182,8 +183,9 @@ TWQC_*操作位解析
 CAP_SUPPORTEDCAPS完整遍历
 全部Capability容器解析
 私有Capability原始信息返回
-通用Capability设置
-设置后MSG_GETCURRENT确认
+固定业务字段到标准/私有 Capability 的映射
+固定业务字段设置和参数校验
+设置结果状态及可选的 MSG_GETCURRENT 回读
 TWRC_CHECKSTATUS处理
 标准Capability中文映射
 ```
@@ -252,11 +254,12 @@ KODAK Scanner: i2000
 → 遍历全部Capability
 → 查询MSG_QUERYSUPPORT
 → 查询MSG_GET
-→ 查询MSG_GETCURRENT
-→ 查询MSG_GETDEFAULT
+→ 按操作位查询 MSG_GETCURRENT 和 MSG_GETDEFAULT
 → 解析容器和Item类型
 → 返回标准及私有Capability
 ```
+
+前端配置项不由全部 Capability 动态生成，而是使用固定业务字段。Capability 查询结果用于填充字段的设备支持状态、候选值、范围、当前值、默认值和查询错误。
 
 ### 7.2 容器类型
 
@@ -318,17 +321,20 @@ TWTY_STR255
 
 私有参数没有厂商映射时保留原始编号和值；后续可以通过配置文件补充中文名称和枚举说明。
 
+`operations` 记录驱动返回的 `TWQC_*` 操作位，供诊断和兼容性记录使用。第一版固定业务配置字段不以 `operations.set`、`operations.getCurrent` 或 `operations.reset` 作为唯一的显示或设置门槛；实际设置结果以 `MSG_SET` 返回状态为准。
+
 ### 7.5 设置规则
 
 1. 只能设置当前设备查询结果中存在的 Capability。
-2. 必须声明支持 `TWQC_SET`。
-3. 枚举值必须来自驱动返回列表。
+2. 只能设置已映射到固定业务配置字段的参数。
+3. 枚举值必须来自驱动返回列表；没有枚举列表时按驱动返回的原始值和业务约束校验。
 4. 范围值必须符合最小值、最大值和步长。
 5. 保留原始 TWAIN Item类型，不能全部转成字符串。
-6. 设置后调用 `MSG_GETCURRENT`确认最终值。
-7. 驱动调整参数时返回请求值和实际值。
-8. 单个参数设置失败时返回明确错误。
-9. `DAT_CUSTOMDSDATA`只支持整块保存和恢复，不解析内部字段。
+6. `TWQC_SET` 操作位必须记录，但不作为固定业务字段设置的唯一拒绝条件；真实设备已经证明部分 `set=false` 参数可以成功设置。
+7. `MSG_SET` 返回状态作为设置结果；返回 `TWRC_CHECKSTATUS` 时读取状态信息并保留最终结果。
+8. 设备支持 `MSG_GETCURRENT` 时回读实际值；不支持时返回 `readbackUnavailable`，不因缺少回读单独判定设置失败。
+9. 单个参数设置失败时返回明确错误。
+10. `DAT_CUSTOMDSDATA`只支持整块保存和恢复，不解析内部字段。
 
 ### 7.6 参数依赖顺序
 
@@ -343,13 +349,13 @@ TWTY_STR255
 → 厂商私有参数
 ```
 
-设置关键上游参数后，重新查询受影响的下游 Capability。
+设置关键上游参数后，重新查询受影响的下游 Capability；前端仍使用固定字段，不把完整 Capability 列表直接生成配置表。
 
 ## 8. 扫描模式和参数
 
 ### 8.1 进纸模式
 
-根据设备实际 Capability动态支持：
+根据固定业务配置字段和设备实际 Capability动态判断可用状态：
 
 ```text
 平板
@@ -382,12 +388,12 @@ JPEG质量通过 `ICAP_JPEGQUALITY` 动态查询和设置：
 
 - 驱动返回枚举时返回枚举值。
 - 驱动返回范围时返回最小值、最大值和步长。
-- 驱动不支持时不提供可设置状态，使用驱动默认值。
-- 设置后读取最终生效值。
+- 驱动不支持或查询失败时，固定配置字段标记为不可用并使用驱动默认值。
+- 设置后在支持 `MSG_GETCURRENT` 时读取最终生效值；不支持时记录无法回读，并以设置返回状态和实际扫描结果作为结果证据。
 
 ### 8.3 全部参数
 
-本机服务查询并返回驱动声明的全部标准和私有 Capability。自动裁边、自动纠偏、自动旋转、空白页处理、背景去除等功能如果由 TWAIN驱动暴露，则由驱动执行；Python不对原图进行二次处理。
+本机服务查询并返回驱动声明的全部标准和私有 Capability，但前端只使用固定业务配置字段。自动裁边、自动纠偏、自动旋转、空白页处理、背景去除等功能如果由 TWAIN驱动暴露，则由驱动执行；Python不对原图进行二次处理。
 
 ## 9. 页面文件模型
 
@@ -1071,15 +1077,16 @@ ADF无纸属于正常结束，不作为错误返回。
 - 能够识别 ADF单面和 ADF双面。
 - 未连接平板附件时不返回可用平板模式。
 - 支持 `TWSX_FILE + JPEG/JFIF`。
-- Capability设置后能够读取实际生效值。
+- 固定业务配置字段能够提交到工作进程并返回设置结果。
+- Capability 支持 `MSG_GETCURRENT` 时能够读取实际生效值；不支持时保留 `readbackUnavailable`，不把缺少回读单独判定为设置失败。
 
 #### 23.1.1 早期真实 Capability 冒烟探测
 
 在 Task 7 的 Fake Source 自动化验证完成后、Task 8 文件传输开发前，增加一次真实设备只读冒烟探测。探测必须使用实际 KODAK i2400、`kds_i2000.inf` 和 `KODAK Scanner: i2000` Data Source，并在 TWAIN 工作进程内以 `show_ui=False` 完成。
 
-探测顺序固定为：读取 `CAP_SUPPORTEDCAPS`；逐项读取 `MSG_QUERYSUPPORT` 操作位；按支持位读取当前值和默认值；保留标准/私有 Capability 编号、容器类型、原始 Item 类型、原始值和单项错误；最后关闭 Data Source。该步骤不做 Capability 设置、不启动扫描，仅用于尽早确认真实驱动与 Task 7 规则的兼容性。探测失败时必须保留真实结果并暂停 Task 8，不能等到 Task 14 才首次发现基础 Capability 不兼容。
+探测顺序固定为：读取 `CAP_SUPPORTEDCAPS`；逐项读取 `MSG_QUERYSUPPORT` 操作位；按可用消息读取当前值和默认值；保留标准/私有 Capability 编号、容器类型、原始 Item 类型、原始值和单项错误；最后关闭 Data Source。该步骤不做 Capability 设置、不启动扫描，仅用于确认设备能力快照和参数容器可解析。查询到 `set=false` 或 `getCurrent=false` 不单独阻断 Task 8，Task 8 另行验证固定业务字段的实际设置和文件传输结果。
 
-该冒烟探测不替代 Task 14。Task 14 仍需重新执行完整 Capability 查询，并继续验证设置回读、图像传输、数百页任务、异常恢复和联调。
+该冒烟探测不替代 Task 14。Task 14 仍需重新执行完整 Capability 查询，并继续验证固定业务字段设置、可回读项的回读、不可回读项的设置结果、图像传输、数百页任务、异常恢复和联调。
 
 至少验证：
 
