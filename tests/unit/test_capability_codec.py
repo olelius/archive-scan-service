@@ -70,6 +70,29 @@ def test_one_value_maps_standard_capability_and_operations(codec):
     }
 
 
+def test_maps_fixed_scan_capability_standard_names(codec):
+    from app.scanner.capability_codec import (
+        ICAP_JPEGQUALITY,
+        ICAP_ORIENTATION,
+        ICAP_XRESOLUTION,
+    )
+
+    expected = {
+        ICAP_XRESOLUTION: "ICAP_XRESOLUTION",
+        ICAP_ORIENTATION: "ICAP_ORIENTATION",
+        ICAP_JPEGQUALITY: "ICAP_JPEGQUALITY",
+    }
+
+    for capability_id, standard_code in expected.items():
+        result = codec.decode_one_value(
+            capability_id=capability_id,
+            item_type="TWTY_FIX32",
+            current=300,
+        )
+        assert result.standard_code == standard_code
+        assert result.custom is False
+
+
 def test_enumeration_preserves_allowed_values_and_indexes(codec):
     from app.scanner.capability_codec import TW_ENUMERATION
 

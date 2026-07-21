@@ -197,14 +197,21 @@ def test_set_rejects_capability_not_in_current_snapshot():
         service.set_capability(0x8999, 1)
 
 
-def test_set_rejects_read_only_capability():
-    from app.scanner.capability_service import CapabilitySetError, CapabilityService
+def test_set_allows_driver_operation_mask_without_set_bit():
+    from app.scanner.capability_service import CapabilityService
 
-    service = CapabilityService(_source_for_query())
+    source = _source_for_query()
+    service = CapabilityService(source)
     service.query_all()
 
-    with pytest.raises(CapabilitySetError, match="不支持设置"):
-        service.set_capability(0x8004, 2)
+    result = service.set_capability(0x8004, 2)
+
+    assert result.requested == 2
+    assert result.actual is None
+    assert result.status_code == 0
+    assert result.readback_unavailable is True
+    assert result.to_payload()["readbackUnavailable"] is True
+    assert source.set_calls == [(0x8004, "TWTY_UINT16", 2)]
 
 
 def test_set_rejects_enumeration_value_outside_driver_values():

@@ -130,17 +130,13 @@ class CapabilityService:
         return tuple(self._snapshot.values())
 
     def set_capability(self, capability_id: int, value: Any) -> CapabilitySetResult:
-        """按最近一次查询快照校验并设置 Capability，然后回读实际值。"""
+        """按最近一次查询快照校验并设置 Capability，按设备能力可选回读。"""
 
         capability = self._snapshot.get(capability_id)
         if capability is None:
             raise CapabilitySetError("只能设置本次查询结果中的 Capability")
         if capability.query_error is not None:
             raise CapabilitySetError("当前 Capability 查询失败，不能设置")
-        if not capability.operations.set:
-            raise CapabilitySetError("当前 Capability 不支持设置")
-        if not capability.operations.get_current:
-            raise CapabilitySetError("当前 Capability 不支持设置后的 GETCURRENT 回读")
 
         self._validate_value(capability, value)
         try:
@@ -160,16 +156,29 @@ class CapabilityService:
                 f"Capability {capability.capability_hex} 设置返回异常状态 {status}"
             )
 
-        try:
-            current_raw = self._source.get_capability(
-                capability_id,
-                CapabilityMessage.GET_CURRENT,
-            )
-            actual = self._extract_current(current_raw)
-        except Exception as exc:
-            raise CapabilitySetError(
-                f"Capability {capability.capability_hex} 设置后无法读取实际值"
-            ) from exc
+        if status == TWRC_CHECKSTATUS:
+            get_status = getattr(self._source, "get_status", None)
+            if callable(get_status):
+                try:
+                    get_status()
+                except Exception as exc:
+                    raise CapabilitySetError(
+                        f"Capability {capability.capability_hex} 设置后的状态读取失败"
+                    ) from exc
+
+        readback_unavailable = not capability.operations.get_current
+        actual = None
+        if not readback_unavailable:
+            try:
+                current_raw = self._source.get_capability(
+                    capability_id,
+                    CapabilityMessage.GET_CURRENT,
+                )
+                actual = self._extract_current(current_raw)
+            except Exception as exc:
+                raise CapabilitySetError(
+                    f"Capability {capability.capability_hex} 设置后无法读取实际值"
+                ) from exc
 
         return CapabilitySetResult(
             capability_id=capability_id,
@@ -177,6 +186,8 @@ class CapabilityService:
             requested=value,
             actual=actual,
             check_status=status == TWRC_CHECKSTATUS,
+            status_code=status,
+            readback_unavailable=readback_unavailable,
         )
 
     def _query_one(self, capability_id: int) -> CapabilitySchema:
