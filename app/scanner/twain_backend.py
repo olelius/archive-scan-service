@@ -850,6 +850,26 @@ class TwainBackend:
         self._capability_service = service
         return service.query_all()
 
+    def resolve_capabilities(self, settings: Mapping[str, Any]) -> list[Any]:
+        """应用固定配置后重新查询 Capability，不开始图像传输。"""
+
+        if self._source_handle is None:
+            raise TwainBackendError(
+                "TWAIN_SOURCE_NOT_OPEN",
+                "重新查询 Capability 前必须先打开 Data Source",
+            )
+        if settings:
+            try:
+                self._apply_fixed_settings(settings)
+            except TwainBackendError:
+                raise
+            except Exception as exc:
+                raise TwainBackendError(
+                    "TWAIN_CAPABILITY_SET_FAILED",
+                    "重新查询前的固定配置设置失败",
+                ) from exc
+        return self.query_capabilities()
+
     def scan_once(
         self,
         output_dir: str | Path,

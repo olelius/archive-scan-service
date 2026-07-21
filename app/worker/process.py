@@ -40,6 +40,12 @@ class WorkerRuntime(Protocol):
     def query_capabilities(self) -> list[CapabilitySchema]:
         """查询当前打开 Data Source 的全部 Capability。"""
 
+    def resolve_capabilities(
+        self,
+        settings: Mapping[str, Any],
+    ) -> list[CapabilitySchema]:
+        """应用固定配置并重新查询 Capability，不开始扫描。"""
+
     def scan_once(
         self,
         device_id: str,
@@ -69,6 +75,12 @@ class NoopWorkerRuntime:
         raise TwainBackendError("TWAIN_SOURCE_NOT_FOUND", "测试运行时没有 TWAIN Data Source")
 
     def query_capabilities(self) -> list[CapabilitySchema]:
+        raise TwainBackendError(
+            "TWAIN_SOURCE_NOT_OPEN",
+            "测试运行时没有打开 TWAIN Data Source",
+        )
+
+    def resolve_capabilities(self, settings: Mapping[str, Any]) -> list[CapabilitySchema]:
         raise TwainBackendError(
             "TWAIN_SOURCE_NOT_OPEN",
             "测试运行时没有打开 TWAIN Data Source",
@@ -116,6 +128,14 @@ class TwainRuntime:
         if self._backend is None:
             raise RuntimeError("TWAIN 后端已经关闭")
         return self._backend.query_capabilities()
+
+    def resolve_capabilities(
+        self,
+        settings: Mapping[str, Any],
+    ) -> list[CapabilitySchema]:
+        if self._backend is None:
+            raise RuntimeError("TWAIN 后端已经关闭")
+        return self._backend.resolve_capabilities(settings)
 
     def scan_once(
         self,
@@ -341,6 +361,7 @@ def _handle_command(
     if command.message_type in {
         CommandType.OPEN_SOURCE.value,
         CommandType.QUERY_CAPABILITIES.value,
+        CommandType.RESOLVE_CAPABILITIES.value,
         CommandType.CLOSE_SOURCE.value,
     }:
         if active_scan is not None:
@@ -388,6 +409,32 @@ def _handle_command(
                         event_type="capabilities_queried",
                         command_id=command.command_id,
                         payload=payload,
+                    ),
+                )
+                _command_succeeded(
+                    event_queue,
+                    command,
+                    payload={"count": len(capabilities)},
+                )
+                return active_scan, False
+
+            if command.message_type == CommandType.RESOLVE_CAPABILITIES.value:
+                settings = command.payload.get("settings", {})
+                if not isinstance(settings, Mapping):
+                    raise TwainBackendError(
+                        "TWAIN_CAPABILITY_SET_FAILED",
+                        "Capability resolve settings 必须是 JSON 对象",
+                    )
+                capabilities = runtime.resolve_capabilities(settings)
+                _emit(
+                    event_queue,
+                    EventMessage(
+                        event_type="capabilities_queried",
+                        command_id=command.command_id,
+                        payload={
+                            "count": len(capabilities),
+                            "capabilities": [item.to_payload() for item in capabilities],
+                        },
                     ),
                 )
                 _command_succeeded(

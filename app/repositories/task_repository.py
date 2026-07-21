@@ -81,32 +81,35 @@ class TaskRepository:
         return record
 
     def get(self, task_id: str) -> ScanTaskRecord | None:
-        row = self._database.connection.execute(
-            "SELECT * FROM scan_task WHERE task_id = ?",
-            (task_id,),
-        ).fetchone()
+        with self._database.lock:
+            row = self._database.connection.execute(
+                "SELECT * FROM scan_task WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
         return self._row_to_record(row) if row is not None else None
 
     def list_all(self) -> list[ScanTaskRecord]:
-        rows = self._database.connection.execute(
-            "SELECT * FROM scan_task ORDER BY created_at, task_id"
-        ).fetchall()
+        with self._database.lock:
+            rows = self._database.connection.execute(
+                "SELECT * FROM scan_task ORDER BY created_at, task_id"
+            ).fetchall()
         return [self._row_to_record(row) for row in rows]
 
     def get_active(self) -> ScanTaskRecord | None:
         """返回当前处于扫描或停止中的任务。"""
 
         placeholders = ", ".join("?" for _ in self._ACTIVE_STATUS_VALUES)
-        row = self._database.connection.execute(
-            f"""
-            SELECT *
-            FROM scan_task
-            WHERE status IN ({placeholders})
-            ORDER BY updated_at, task_id
-            LIMIT 1
-            """,
-            self._ACTIVE_STATUS_VALUES,
-        ).fetchone()
+        with self._database.lock:
+            row = self._database.connection.execute(
+                f"""
+                SELECT *
+                FROM scan_task
+                WHERE status IN ({placeholders})
+                ORDER BY updated_at, task_id
+                LIMIT 1
+                """,
+                self._ACTIVE_STATUS_VALUES,
+            ).fetchone()
         return self._row_to_record(row) if row is not None else None
 
     def claim_scan(
