@@ -21,8 +21,8 @@
 
 ```text
 CREATED   -> SCANNING, CANCELLED
-SCANNING  -> STOPPING, COMPLETED, FAILED, CANCELLED
-STOPPING  -> STOPPED, FAILED, CANCELLED
+SCANNING  -> STOPPING, COMPLETED, FAILED
+STOPPING  -> STOPPED, FAILED
 STOPPED   -> SCANNING, CANCELLED
 FAILED    -> SCANNING, CANCELLED
 COMPLETED -> SCANNING, CANCELLED
@@ -30,6 +30,10 @@ CANCELLED -> （终态）
 ```
 
 `stop_scan()` 只将 `SCANNING` 置为 `STOPPING`；Worker 停止事件由 `mark_stopped()` 置为 `STOPPED`。完成和失败分别由 `complete_scan()`、`fail_scan()` 记录。失败状态保留稳定错误码和面向调用方的错误消息；重新开始扫描时清除上次错误并保存本轮参数快照。
+
+当前 IPC 协议没有取消命令，因此活动任务不能直接转换为 `CANCELLED`；只有尚未开始的
+`CREATED` 任务允许显式取消。活动任务必须先请求停止并收到 Worker 的停止确认，避免
+数据库状态与实际扫描设备状态脱节。
 
 ### RecoveryService
 

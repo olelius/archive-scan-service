@@ -155,6 +155,40 @@ def test_cancelled_task_is_terminal(repository_bundle):
         service.start_scan("task-1", {})
 
 
+def test_active_scan_cannot_be_cancelled_without_stop_handshake(repository_bundle):
+    from app.services.task_service import TaskStateError
+
+    tasks, _ = repository_bundle
+    service = _service(tasks)
+    service.create("task-1", "device-1")
+    service.start_scan("task-1", {})
+
+    with pytest.raises(TaskStateError):
+        service.cancel_scan("task-1")
+
+    assert tasks.get("task-1").status.value == "SCANNING"
+
+
+def test_database_claim_blocks_second_connection(tmp_path: Path):
+    from app.repositories.database import Database
+    from app.repositories.task_repository import TaskRepository
+
+    database_path = tmp_path / "metadata.db"
+    first_database = Database(database_path)
+    second_database = Database(database_path)
+    try:
+        first_tasks = TaskRepository(first_database)
+        second_tasks = TaskRepository(second_database)
+        first_tasks.create("task-1", "device-1")
+        second_tasks.create("task-2", "device-1")
+
+        assert first_tasks.claim_scan("task-1", scan_params_snapshot_json="{}")
+        assert second_tasks.claim_scan("task-2", scan_params_snapshot_json="{}") is None
+    finally:
+        first_database.close()
+        second_database.close()
+
+
 def test_duplicate_task_is_rejected(repository_bundle):
     from app.services.task_service import TaskAlreadyExistsError
 

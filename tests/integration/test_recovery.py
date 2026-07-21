@@ -84,3 +84,22 @@ def test_recovery_leaves_non_active_tasks_unchanged(recovery_context):
     ]
     assert tasks.get("task-1").error_code is None
     assert tasks.get("task-2").error_code is None
+
+
+def test_recovery_does_not_construct_or_start_a_worker(recovery_context, monkeypatch):
+    from app.services.recovery_service import RecoveryService
+
+    class UnexpectedWorkerStart:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("恢复阶段不得启动 Worker")
+
+    import app.worker.supervisor as supervisor_module
+
+    monkeypatch.setattr(
+        supervisor_module,
+        "WorkerSupervisor",
+        UnexpectedWorkerStart,
+    )
+    recovery_context["tasks"].create("task-1", "device-1", status="SCANNING")
+
+    RecoveryService(recovery_context["tasks"]).recover()

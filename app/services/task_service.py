@@ -237,16 +237,12 @@ class TaskService:
         )
 
     def cancel_scan(self, task_id: str) -> ScanTaskRecord:
-        """显式取消尚未完成的任务；取消不会触发文件清理。"""
+        """显式取消尚未开始的任务；活动扫描必须先完成停止握手。"""
 
         return self._transition(
             task_id,
             TaskStatus.CANCELLED,
-            allowed={
-                TaskStatus.CREATED,
-                TaskStatus.SCANNING,
-                TaskStatus.STOPPING,
-            },
+            allowed={TaskStatus.CREATED},
         )
 
     def stop(self, task_id: str) -> ScanTaskRecord:
