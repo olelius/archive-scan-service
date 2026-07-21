@@ -187,8 +187,10 @@ class CapabilitySetResult:
     capability_id: int
     item_type: str
     requested: Any
-    actual: Any
+    actual: Any = None
     check_status: bool = False
+    status_code: int = 0
+    readback_unavailable: bool = False
 
     def to_payload(self) -> dict[str, Any]:
         """转换为 API/IPC 使用的 JSON 对象。"""
@@ -199,6 +201,8 @@ class CapabilitySetResult:
             "requestedValue": _json_safe(self.requested),
             "actualValue": _json_safe(self.actual),
             "checkStatus": self.check_status,
+            "statusCode": self.status_code,
+            "readbackUnavailable": self.readback_unavailable,
         }
 
 

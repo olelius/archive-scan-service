@@ -1,0 +1,20 @@
+{
+  "task": "Task 8",
+  "date": "2026-07-21",
+  "testCommand": ".\\.venv\\python.exe -m pytest tests/integration/test_twain_scan_manual.py -v -s",
+  "environment": {
+    "python": "3.12.13",
+    "architecture": "x64",
+    "dsmPath": "C:\\Windows\\System32\\TWAINDSM.dll",
+    "dsmArchitecture": "x64",
+    "expectedProduct": "KODAK Scanner: i2000",
+    "pnpFriendlyName": "KODAK i2800 Scanner",
+    "pnpPresent": false
+  },
+  "result": "blocked",
+  "errorCode": "TWAIN_SOURCE_OPEN_FAILED",
+  "twainConditionCode": "TWCC_NODS",
+  "details": "枚举可以返回 KODAK Scanner: i2000，但当前 Windows PnP 设备不在场，打开 Data Source 时 TWAIN 返回无可用 Data Source。未执行 Capability 设置、MSG_XFERREADY、文件传输或 JPEG 输出验证。",
+  "imageOutput": null,
+  "compatibilityConclusion": "不作兼容通过结论，待重新连接真实设备后重试。"
+}

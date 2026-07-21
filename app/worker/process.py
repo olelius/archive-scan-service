@@ -9,6 +9,7 @@ import time
 from typing import Any, Callable, Protocol
 
 from app.models.schemas import CapabilitySchema
+from app.scanner.file_transfer import FileTransferResult
 from app.scanner.twain_backend import TwainBackend, TwainBackendError, TwainDevice
 from app.scanner.protocol import CommandType
 from app.worker.messages import (
@@ -39,6 +40,13 @@ class WorkerRuntime(Protocol):
     def query_capabilities(self) -> list[CapabilitySchema]:
         """查询当前打开 Data Source 的全部 Capability。"""
 
+    def scan_once(
+        self,
+        device_id: str,
+        settings: Mapping[str, Any],
+    ) -> FileTransferResult:
+        """执行一次文件模式扫描并返回原图。"""
+
     def close_source(self) -> None:
         """关闭当前打开的 TWAIN Data Source。"""
 
@@ -61,6 +69,16 @@ class NoopWorkerRuntime:
         raise TwainBackendError("TWAIN_SOURCE_NOT_FOUND", "测试运行时没有 TWAIN Data Source")
 
     def query_capabilities(self) -> list[CapabilitySchema]:
+        raise TwainBackendError(
+            "TWAIN_SOURCE_NOT_OPEN",
+            "测试运行时没有打开 TWAIN Data Source",
+        )
+
+    def scan_once(
+        self,
+        device_id: str,
+        settings: Mapping[str, Any],
+    ) -> FileTransferResult:
         raise TwainBackendError(
             "TWAIN_SOURCE_NOT_OPEN",
             "测试运行时没有打开 TWAIN Data Source",
@@ -98,6 +116,25 @@ class TwainRuntime:
         if self._backend is None:
             raise RuntimeError("TWAIN 后端已经关闭")
         return self._backend.query_capabilities()
+
+    def scan_once(
+        self,
+        device_id: str,
+        settings: Mapping[str, Any],
+    ) -> FileTransferResult:
+        if self._backend is None:
+            raise RuntimeError("TWAIN 后端已经关闭")
+        output_dir = settings.get("outputDir")
+        if not isinstance(output_dir, str) or not output_dir:
+            raise TwainBackendError("SCAN_FAILED", "扫描必须提供 outputDir")
+        page_id = settings.get("pageId", "page-1")
+        if not isinstance(page_id, str) or not page_id:
+            raise TwainBackendError("SCAN_FAILED", "扫描 pageId 必须是非空字符串")
+        return self._backend.scan_once(
+            output_dir,
+            page_id=page_id,
+            settings=settings,
+        )
 
     def close_source(self) -> None:
         if self._backend is not None:
@@ -187,7 +224,75 @@ def _handle_command(
                 payload={"pid": os.getpid()},
             ),
         )
-        return command, False
+        # 没有输出目录的生命周期命令只验证“扫描中”状态，不能启动文件传输。
+        if not isinstance(command.settings.get("outputDir"), str):
+            return command, False
+        try:
+            result = runtime.scan_once(command.device_id, command.settings)
+        except TwainBackendError as exc:
+            _emit(
+                event_queue,
+                EventMessage(
+                    event_type="scan_failed",
+                    command_id=command.command_id,
+                    task_id=command.task_id,
+                    payload={
+                        "errorCode": exc.error_code,
+                        "errorMessage": str(exc),
+                    },
+                ),
+            )
+            return None, False
+        except Exception:
+            _emit(
+                event_queue,
+                EventMessage(
+                    event_type="scan_failed",
+                    command_id=command.command_id,
+                    task_id=command.task_id,
+                    payload={
+                        "errorCode": "SCAN_FAILED",
+                        "errorMessage": "TWAIN扫描失败",
+                    },
+                ),
+            )
+            return None, False
+
+        configuration_results = [dict(item) for item in result.configuration_results]
+        page_payload: dict[str, Any] = {
+            "path": str(result.original_path),
+            "size": result.size,
+            "transferReturnCode": result.transfer_return_code,
+            "pendingCount": result.pending_count,
+        }
+        if configuration_results:
+            page_payload["configurationResults"] = configuration_results
+        _emit(
+            event_queue,
+            EventMessage(
+                event_type="page_file_ready",
+                command_id=command.command_id,
+                task_id=command.task_id,
+                payload=page_payload,
+            ),
+        )
+        completion_payload: dict[str, Any] = {
+            "pageCount": 1,
+            "pendingCount": result.pending_count,
+            "transferReturnCode": result.transfer_return_code,
+        }
+        if configuration_results:
+            completion_payload["configurationResults"] = configuration_results
+        _emit(
+            event_queue,
+            EventMessage(
+                event_type="scan_completed",
+                command_id=command.command_id,
+                task_id=command.task_id,
+                payload=completion_payload,
+            ),
+        )
+        return None, False
 
     if command.message_type == CommandType.ENUMERATE_DEVICES.value:
         if active_scan is not None:

@@ -1,0 +1,49 @@
+{
+  "task": "Task 8",
+  "attempt": "device-reconnected-rerun",
+  "date": "2026-07-21",
+  "testCommand": ".\\.venv\\python.exe -m pytest tests/integration/test_twain_scan_manual.py -v -s",
+  "environment": {
+    "python": "3.12.13",
+    "architecture": "x64",
+    "dsmPath": "C:\\Windows\\System32\\TWAINDSM.dll",
+    "dsmArchitecture": "x64",
+    "expectedProduct": "KODAK Scanner: i2000",
+    "pnpFriendlyName": "KODAK i2800 Scanner",
+    "pnpStatus": "OK",
+    "pnpPresent": true,
+    "twainDriverEntry": "kds_i2000.inf"
+  },
+  "workflow": {
+    "showUi": false,
+    "transferMechanism": "TWSX_FILE",
+    "fileFormat": "TWFF_JFIF",
+    "fixedTransportSettings": {
+      "CAP_XFERCOUNT": 1,
+      "ICAP_XFERMECH": "TWSX_FILE",
+      "ICAP_IMAGEFILEFORMAT": "TWFF_JFIF"
+    },
+    "observedEvents": [
+      "page_file_ready",
+      "scan_completed"
+    ]
+  },
+  "result": "passed",
+  "output": {
+    "relativePath": "scan-test-output/manual-page-1.jpg",
+    "size": 165317,
+    "format": "JPEG",
+    "dimensions": [
+      1474,
+      2159
+    ],
+    "sha256": "6a3f252a76b420f91bf6c09c354e9f063f7f385a80239f0656c521760948f3ed",
+    "startsWithJpegSoi": true,
+    "endsWithJpegEoi": true
+  },
+  "transfer": {
+    "transferReturnCode": 6,
+    "pendingCount": 0
+  },
+  "compatibilityConclusion": "Task 8 单面 TWSX_FILE + TWFF_JFIF 文件传输闭环通过；不代表 Task 14 长批次、双面和异常场景验收完成。"
+}
