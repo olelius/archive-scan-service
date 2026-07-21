@@ -349,13 +349,14 @@ class WorkerGateway:
     def _handle_worker_event(self, event: WorkerEvent) -> None:
         if isinstance(event, WorkerReadyEvent):
             with self._condition:
-                was_ready = self._worker_ready
                 self._worker_ready = True
                 self._worker_pid = event.pid
                 self._generation = event.generation
             self._events.publish(
                 {
-                    "event": "worker_restarted" if was_ready else "worker_started",
+                    "event": "worker_restarted"
+                    if event.generation > 1
+                    else "worker_started",
                     "data": {"pid": event.pid, "generation": event.generation},
                 }
             )
@@ -571,7 +572,13 @@ class ApplicationContext:
         }
 
     def list_devices(self) -> list[dict[str, Any]]:
-        values = [device_payload(item) for item in self.worker.enumerate_devices()]
+        try:
+            raw_devices = self.worker.enumerate_devices()
+        except (ApiError, WorkerGatewayError):
+            raise
+        except Exception as exc:
+            raise ApiError("INTERNAL_ERROR") from exc
+        values = [device_payload(item) for item in raw_devices]
         self._devices = {
             item["deviceId"]: item for item in values if isinstance(item.get("deviceId"), str)
         }
@@ -584,14 +591,24 @@ class ApplicationContext:
         return values
 
     def get_capabilities(self, device_id: str) -> list[Mapping[str, Any]]:
-        return list(self.worker.get_capabilities(device_id))
+        try:
+            return list(self.worker.get_capabilities(device_id))
+        except (ApiError, WorkerGatewayError):
+            raise
+        except Exception as exc:
+            raise ApiError("INTERNAL_ERROR") from exc
 
     def resolve_capabilities(
         self,
         device_id: str,
         settings: Mapping[str, Any],
     ) -> list[Mapping[str, Any]]:
-        return list(self.worker.resolve_capabilities(device_id, settings))
+        try:
+            return list(self.worker.resolve_capabilities(device_id, settings))
+        except (ApiError, WorkerGatewayError):
+            raise
+        except Exception as exc:
+            raise ApiError("INTERNAL_ERROR") from exc
 
     def create_task(self, body: Mapping[str, Any]) -> Any:
         device_id = require_identifier(body.get("deviceId"), "deviceId")
@@ -656,7 +673,9 @@ class ApplicationContext:
                 )
             except TaskServiceError:
                 pass
-            raise
+            if isinstance(exc, (ApiError, WorkerGatewayError)):
+                raise
+            raise ApiError("INTERNAL_ERROR") from exc
         self.event_hub.publish(
             {
                 "event": "task_started",
@@ -679,7 +698,9 @@ class ApplicationContext:
             self.worker.stop_scan(task_id)
         except Exception as exc:
             self.task_service.fail_scan(task_id, "WORKER_UNAVAILABLE", "扫描工作进程不可用")
-            raise exc
+            if isinstance(exc, (ApiError, WorkerGatewayError)):
+                raise
+            raise ApiError("INTERNAL_ERROR") from exc
         self.event_hub.publish(
             {
                 "event": "task_stopping",
