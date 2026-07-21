@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 import sqlite3
+import threading
 from types import TracebackType
 from typing import Iterator
 
@@ -18,14 +19,17 @@ class Database:
 
     path: Path
     connection: sqlite3.Connection = field(init=False)
+    lock: threading.RLock = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.path = Path(self.path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.lock = threading.RLock()
         self.connection = sqlite3.connect(
             self.path,
             timeout=5.0,
             isolation_level=None,
+            check_same_thread=False,
         )
         self.connection.row_factory = sqlite3.Row
         self.connection.execute("PRAGMA foreign_keys = ON")
@@ -37,19 +41,21 @@ class Database:
     def transaction(self) -> Iterator[sqlite3.Connection]:
         """以立即事务执行一次主进程写操作。"""
 
-        self.connection.execute("BEGIN IMMEDIATE")
-        try:
-            yield self.connection
-        except BaseException:
-            self.connection.rollback()
-            raise
-        else:
-            self.connection.commit()
+        with self.lock:
+            self.connection.execute("BEGIN IMMEDIATE")
+            try:
+                yield self.connection
+            except BaseException:
+                self.connection.rollback()
+                raise
+            else:
+                self.connection.commit()
 
     def close(self) -> None:
         """关闭数据库连接。"""
 
-        self.connection.close()
+        with self.lock:
+            self.connection.close()
 
     def __enter__(self) -> "Database":
         return self

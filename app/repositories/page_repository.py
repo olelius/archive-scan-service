@@ -109,14 +109,15 @@ class PageRepository:
         return record
 
     def get(self, task_id: str, page_id: str) -> ScanPageRecord | None:
-        row = self._database.connection.execute(
-            """
-            SELECT *
-            FROM scan_page
-            WHERE task_id = ? AND page_id = ?
-            """,
-            (task_id, page_id),
-        ).fetchone()
+        with self._database.lock:
+            row = self._database.connection.execute(
+                """
+                SELECT *
+                FROM scan_page
+                WHERE task_id = ? AND page_id = ?
+                """,
+                (task_id, page_id),
+            ).fetchone()
         return self._row_to_record(row) if row is not None else None
 
     def list_by_task(
@@ -126,36 +127,39 @@ class PageRepository:
         after_sequence: int | None = None,
     ) -> list[ScanPageRecord]:
         if after_sequence is None:
-            rows = self._database.connection.execute(
-                """
-                SELECT *
-                FROM scan_page
-                WHERE task_id = ?
-                ORDER BY sequence
-                """,
-                (task_id,),
-            ).fetchall()
+            with self._database.lock:
+                rows = self._database.connection.execute(
+                    """
+                    SELECT *
+                    FROM scan_page
+                    WHERE task_id = ?
+                    ORDER BY sequence
+                    """,
+                    (task_id,),
+                ).fetchall()
         else:
-            rows = self._database.connection.execute(
-                """
-                SELECT *
-                FROM scan_page
-                WHERE task_id = ? AND sequence > ?
-                ORDER BY sequence
-                """,
-                (task_id, after_sequence),
-            ).fetchall()
+            with self._database.lock:
+                rows = self._database.connection.execute(
+                    """
+                    SELECT *
+                    FROM scan_page
+                    WHERE task_id = ? AND sequence > ?
+                    ORDER BY sequence
+                    """,
+                    (task_id, after_sequence),
+                ).fetchall()
         return [self._row_to_record(row) for row in rows]
 
     def next_sequence(self, task_id: str) -> int:
-        row = self._database.connection.execute(
-            """
-            SELECT last_page_sequence + 1 AS next_sequence
-            FROM scan_task
-            WHERE task_id = ?
-            """,
-            (task_id,),
-        ).fetchone()
+        with self._database.lock:
+            row = self._database.connection.execute(
+                """
+                SELECT last_page_sequence + 1 AS next_sequence
+                FROM scan_task
+                WHERE task_id = ?
+                """,
+                (task_id,),
+            ).fetchone()
         if row is None:
             raise KeyError(f"任务不存在：{task_id}")
         return int(row["next_sequence"])

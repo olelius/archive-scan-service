@@ -14,6 +14,11 @@ DEFAULT_MAX_LOG_FILE_SIZE_BYTES = 10 * 1024 * 1024
 DEFAULT_LOG_BACKUP_COUNT = 10
 
 
+def _configured_origins() -> tuple[str, ...]:
+    raw = os.environ.get("ARCHIVE_SCAN_ALLOWED_ORIGINS", "")
+    return tuple(item.strip() for item in raw.split(",") if item.strip())
+
+
 @dataclass(slots=True)
 class Settings:
     """保存服务配置，并固定本机监听边界。"""
@@ -24,6 +29,7 @@ class Settings:
     log_level: str = DEFAULT_LOG_LEVEL
     max_log_file_size_bytes: int = DEFAULT_MAX_LOG_FILE_SIZE_BYTES
     log_backup_count: int = DEFAULT_LOG_BACKUP_COUNT
+    allowed_origins: tuple[str, ...] = field(default_factory=_configured_origins)
 
     def __post_init__(self) -> None:
         if self.data_root is None:
@@ -36,6 +42,7 @@ class Settings:
         else:
             root = Path(self.data_root)
         self.data_root = root
+        self.allowed_origins = tuple(self.allowed_origins)
 
     @property
     def database_path(self) -> Path:
@@ -44,6 +51,10 @@ class Settings:
     @property
     def originals_dir(self) -> Path:
         return self.data_root / "originals"
+
+    @property
+    def tasks_dir(self) -> Path:
+        return self.data_root / "tasks"
 
     @property
     def thumbnails_dir(self) -> Path:
@@ -63,6 +74,7 @@ class Settings:
         for directory in (
             self.originals_dir,
             self.thumbnails_dir,
+            self.tasks_dir,
             self.temp_dir,
             self.logs_dir,
         ):

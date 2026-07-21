@@ -108,3 +108,48 @@ def test_enumerate_devices_is_rejected_during_scan():
     assert should_exit is False
     assert failed.event_type == "command_failed"
     assert failed.payload["errorCode"] == "SCANNER_BUSY"
+
+
+def test_resolve_capabilities_emits_snapshot_without_starting_scan():
+    from app.worker.messages import CommandMessage, decode_message
+    from app.worker.process import _handle_command
+
+    class FakeCapability:
+        def to_payload(self):
+            return {
+                "capabilityId": 100,
+                "capabilityName": "CAP_FEEDERENABLED",
+                "currentValue": True,
+            }
+
+    class FakeRuntime:
+        def __init__(self):
+            self.settings = None
+
+        def resolve_capabilities(self, settings):
+            self.settings = settings
+            return [FakeCapability()]
+
+    runtime = FakeRuntime()
+    event_queue = Queue()
+    command = CommandMessage(
+        command_id="cmd-resolve-1",
+        message_type="resolve_capabilities",
+        payload={"settings": {"resolution": 300}, "showUi": False},
+    )
+
+    active_scan, should_exit = _handle_command(
+        command,
+        event_queue,
+        active_scan=None,
+        runtime=runtime,
+    )
+
+    queried = decode_message(event_queue.get_nowait())
+    succeeded = decode_message(event_queue.get_nowait())
+    assert active_scan is None
+    assert should_exit is False
+    assert runtime.settings == {"resolution": 300}
+    assert queried.event_type == "capabilities_queried"
+    assert queried.payload["count"] == 1
+    assert succeeded.event_type == "command_succeeded"
