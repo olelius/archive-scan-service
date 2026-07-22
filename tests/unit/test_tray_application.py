@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import os
-from threading import Event
+from threading import Event, Thread
 from types import SimpleNamespace
 from uuid import uuid4
 
@@ -63,6 +63,20 @@ class FakeContext:
     def close(self) -> None:
         self.close_count += 1
         self.events.append("context.close")
+
+
+class FakeStartupManager:
+    def __init__(self, enabled: bool = False) -> None:
+        self.enabled = enabled
+        self.set_values: list[bool] = []
+
+    def is_enabled(self) -> bool:
+        return self.enabled
+
+    def set_enabled(self, enabled: bool) -> bool:
+        self.set_values.append(enabled)
+        self.enabled = enabled
+        return enabled
 
 
 class FakeServer:
@@ -188,13 +202,272 @@ def test_tray_menu_shows_status_and_opens_data_directory(tmp_path: Path):
         settings=Settings(data_root=tmp_path),
         application=SimpleNamespace(state=SimpleNamespace(context=context)),
         open_directory=lambda path: events.append(f"open:{path}"),
+        startup_manager=FakeStartupManager(),
     )
 
     labels = [item.text for item in application.build_menu()]
 
-    assert labels == ["服务状态：正常（Worker 4242）", "打开数据目录", "退出"]
+    assert labels == [
+        "服务状态：正常",
+        "扫描仪状态：离线",
+        "扫描仪：未识别",
+        "厂商：未识别",
+        "Worker：4242",
+        "开启服务",
+        "开机启动",
+        "打开数据目录",
+        "退出",
+    ]
     application.open_data_directory()
     assert events == [f"open:{tmp_path.resolve()}"]
+
+
+def test_tray_menu_shows_current_scanner_details(tmp_path: Path):
+    from app.config import Settings
+    from app.tray.application import TrayApplication
+
+    context = FakeContext([])
+    context.list_devices = lambda: [
+        {
+            "deviceId": "device-1",
+            "manufacturer": "Eastman Kodak",
+            "productName": "KODAK Scanner: i2000",
+            "online": True,
+        }
+    ]
+    application = TrayApplication(
+        settings=Settings(data_root=tmp_path),
+        application=SimpleNamespace(state=SimpleNamespace(context=context)),
+        startup_manager=FakeStartupManager(),
+    )
+
+    labels = [item.text for item in application.build_menu()]
+
+    assert labels == [
+        "服务状态：正常",
+        "扫描仪状态：在线",
+        "扫描仪：KODAK Scanner: i2000",
+        "厂商：Eastman Kodak",
+        "Worker：4242",
+        "开启服务",
+        "开机启动",
+        "打开数据目录",
+        "退出",
+    ]
+
+
+def test_startup_menu_item_toggles_and_refreshes_native_menu(tmp_path: Path):
+    from app.config import Settings
+    from app.tray.application import TrayApplication
+
+    manager = FakeStartupManager()
+    updates: list[str] = []
+    application = TrayApplication(
+        settings=Settings(data_root=tmp_path),
+        startup_manager=manager,
+    )
+    application._icon = SimpleNamespace(update_menu=lambda: updates.append("update"))
+
+    menu = application.build_menu()
+    startup_item = next(item for item in menu if item.text == "开机启动")
+
+    assert startup_item.checked is False
+    startup_item(application._icon)
+    assert manager.set_values == [True]
+    assert startup_item.checked is True
+    assert updates == ["update"]
+
+
+def test_service_control_restarts_server_and_updates_dynamic_label(tmp_path: Path):
+    from app.config import Settings
+    from app.tray.application import TrayApplication
+
+    events: list[str] = []
+    first_context = FakeContext(events)
+    second_context = FakeContext(events)
+    contexts = [first_context, second_context]
+    servers = [FakeServer(events), FakeServer(events)]
+
+    def application_factory():
+        return SimpleNamespace(
+            state=SimpleNamespace(context=contexts.pop(0)),
+        )
+
+    def server_factory(_config):
+        return servers.pop(0)
+
+    updates: list[str] = []
+    application = TrayApplication(
+        settings=Settings(data_root=tmp_path),
+        application_factory=application_factory,
+        server_factory=server_factory,
+    )
+    application._icon = SimpleNamespace(update_menu=lambda: updates.append("update"))
+
+    assert application.service_control_text() == "开启服务"
+
+    assert application.start_service() is True
+    assert application.service_control_text() == "关闭服务"
+
+    assert application.stop_service() is True
+    assert application.service_control_text() == "开启服务"
+    assert application.status_text() == "服务状态：未启动"
+    assert first_context.close_count == 1
+
+    assert application.start_service() is True
+    assert application.service_control_text() == "关闭服务"
+    assert application.status_text() == "服务状态：正常"
+    assert application.stop_service() is True
+    assert application.service_control_text() == "开启服务"
+    assert application.status_text() == "服务状态：未启动"
+    assert second_context.close_count == 1
+    assert updates == ["update", "update", "update", "update"]
+
+
+def test_start_service_refreshes_menu_after_worker_becomes_ready(tmp_path: Path):
+    from app.config import Settings
+    from app.tray.application import TrayApplication
+
+    events: list[str] = []
+    context = FakeContext(events, ready=False)
+
+    class ControlledStartServer:
+        def __init__(self) -> None:
+            self.entered = Event()
+            self.release_startup = Event()
+            self.started = False
+            self.should_exit = False
+            self.force_exit = False
+
+        def run(self) -> None:
+            self.entered.set()
+            self.release_startup.wait(timeout=1)
+            context.ready = True
+            self.started = True
+            while not self.should_exit and not self.force_exit:
+                self.release_startup.wait(timeout=0.01)
+
+    server = ControlledStartServer()
+    refresh_states: list[bool] = []
+    refresh_called = Event()
+    application = TrayApplication(
+        settings=Settings(data_root=tmp_path),
+        application_factory=lambda: SimpleNamespace(
+            state=SimpleNamespace(context=context),
+        ),
+        server_factory=lambda _config: server,
+    )
+    application._icon = SimpleNamespace(
+        update_menu=lambda: (refresh_states.append(context.ready), refresh_called.set())
+    )
+
+    completed = Event()
+    starter = Thread(
+        target=lambda: (application.start_service(), completed.set()),
+        daemon=True,
+    )
+    starter.start()
+    assert server.entered.wait(timeout=1)
+    assert completed.wait(timeout=0.1) is False
+    assert refresh_called.wait(timeout=0.1) is False
+
+    server.release_startup.set()
+    assert completed.wait(timeout=1)
+    assert refresh_states == [True]
+
+    assert application.stop_service() is True
+
+
+def test_device_change_refreshes_native_menu(tmp_path: Path):
+    from app.config import Settings
+    from app.tray.application import TrayApplication
+
+    events: list[str] = []
+    updated = Event()
+
+    class RefreshableIcon(FakeIcon):
+        def update_menu(self) -> None:
+            events.append("icon.update_menu")
+            updated.set()
+
+    class FakeDeviceMonitor:
+        def __init__(self, callback) -> None:
+            self.callback = callback
+
+        def start(self) -> None:
+            events.append("device_monitor.start")
+
+        def stop(self) -> None:
+            events.append("device_monitor.stop")
+
+        def emit_change(self) -> None:
+            self.callback()
+
+    icon = RefreshableIcon(events)
+    monitor: FakeDeviceMonitor | None = None
+
+    def create_monitor(callback):
+        nonlocal monitor
+        monitor = FakeDeviceMonitor(callback)
+        return monitor
+
+    application = TrayApplication(
+        settings=Settings(data_root=tmp_path),
+        application=SimpleNamespace(
+            state=SimpleNamespace(context=FakeContext(events))
+        ),
+        device_monitor_factory=create_monitor,
+    )
+    application._icon = icon
+
+    application._start_device_monitor()
+    try:
+        assert events == ["device_monitor.start"]
+        assert monitor is not None
+        monitor.emit_change()
+        assert updated.wait(timeout=1)
+        assert events == ["device_monitor.start", "icon.update_menu"]
+    finally:
+        application._stop_device_monitor()
+
+    assert events == [
+        "device_monitor.start",
+        "icon.update_menu",
+        "device_monitor.stop",
+    ]
+
+
+def test_device_monitor_registration_failure_does_not_stop_tray(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    from app.config import Settings
+    from app.tray import application as tray_application
+    from app.tray.application import TrayApplication
+
+    warnings: list[str] = []
+    monkeypatch.setattr(
+        tray_application.LOGGER,
+        "warning",
+        lambda message, **_kwargs: warnings.append(message),
+    )
+
+    def create_monitor(_callback):
+        raise RuntimeError("注册失败")
+
+    application = TrayApplication(
+        settings=Settings(data_root=tmp_path),
+        application=SimpleNamespace(
+            state=SimpleNamespace(context=FakeContext([]))
+        ),
+        device_monitor_factory=create_monitor,
+    )
+    application._icon = SimpleNamespace(update_menu=lambda: None)
+
+    application._start_device_monitor()
+
+    assert application._device_monitor is None
+    assert warnings == ["注册 Windows 设备变化通知失败，继续运行托盘服务"]
 
 
 def test_tray_exit_stops_server_before_context_and_mutex(tmp_path: Path):

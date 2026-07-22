@@ -22,6 +22,7 @@ from app.models.enums import TaskStatus
 from app.repositories.database import Database
 from app.repositories.page_repository import PageRepository
 from app.repositories.task_repository import TaskRepository
+from app.scanner.pnp_status import DeviceStatusResolver, WindowsPnpStatusResolver
 from app.scanner.protocol import CommandType
 from app.services.event_hub import EventHub
 from app.services.page_service import PageRegistrationError, PageService
@@ -507,6 +508,7 @@ class ApplicationContext:
         settings: Settings | None = None,
         worker: WorkerGatewayProtocol | None = None,
         database: Database | None = None,
+        device_status_resolver: DeviceStatusResolver | None = None,
     ) -> None:
         self.settings = settings or Settings()
         self.settings.ensure_directories()
@@ -528,6 +530,9 @@ class ApplicationContext:
             task_service=self.task_service,
             page_service=self.page_service,
             event_hub=self.event_hub,
+        )
+        self._device_status_resolver = (
+            device_status_resolver or WindowsPnpStatusResolver()
         )
         self._started = False
         self._closed = False
@@ -578,7 +583,7 @@ class ApplicationContext:
             raise
         except Exception as exc:
             raise ApiError("INTERNAL_ERROR") from exc
-        values = [device_payload(item) for item in raw_devices]
+        values = self._device_status_resolver.enrich_devices(raw_devices)
         self._devices = {
             item["deviceId"]: item for item in values if isinstance(item.get("deviceId"), str)
         }

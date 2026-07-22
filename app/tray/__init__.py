@@ -7,6 +7,7 @@ from app.tray.application import (
     create_tray_image,
     main,
 )
+from app.tray.startup import StartupManager
 
 __all__ = [
     "DEFAULT_MUTEX_NAME",
@@ -14,5 +15,6 @@ __all__ = [
     "TrayApplication",
     "create_tray_image",
     "main",
+    "StartupManager",
 ]
 
