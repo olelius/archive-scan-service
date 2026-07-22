@@ -211,7 +211,8 @@ app/scanner/
 → 主进程发送LIST_DEVICES
 → 工作子进程打开DSM
 → 枚举全部64位TWAIN Data Source
-→ 返回设备列表
+→ 主进程使用 Windows SetupAPI/CfgMgr32 查询 Image 类 PnP 节点状态
+→ 合并 `online` 状态后返回设备列表
 ```
 
 设备信息：
@@ -224,9 +225,11 @@ app/scanner/
   "productName": "设备名称",
   "protocolMajor": 2,
   "protocolMinor": 5,
-  "online": true
+  "online": false
 }
 ```
+
+`online` 不表示 TWAIN Data Source 是否已安装，而表示对应 Windows Image 类 PnP 设备当前是否在场且无配置问题。主进程根据厂商和设备名称将 TWAIN 枚举结果与 PnP 快照匹配：`Present=False`、phantom 节点或配置管理器返回错误时为 `false`；无法匹配或 PnP 查询失败时保留枚举结果的默认状态，不阻断设备列表接口。该状态查询使用 Windows SetupAPI/CfgMgr32，不引入 WIA、WMI 或其他扫描协议。
 
 第一版目标驱动入口：
 
@@ -828,13 +831,20 @@ TWAIN工作子进程的 DSM、Data Source和 Capability操作严格串行。
 ```text
 服务状态
 当前扫描任务
+扫描仪状态
+扫描仪名称
+厂商
+Worker
+关闭服务 / 开启服务
+开机启动（复选项）
 打开数据目录
 打开日志目录
 重启扫描组件
 重启本机服务
-设置开机启动
 退出程序
 ```
+
+第一版托盘直接使用当前用户注册表 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` 管理“开机启动”复选项。服务控制项根据 HTTP 服务线程状态动态显示“关闭服务”或“开启服务”；关闭服务只停止 HTTP、Worker、事件中心和 SQLite，保留托盘和单实例互斥体，重新开启时创建新的 FastAPI 上下文。
 
 第一版不提供完整本机任务管理窗口。
 
