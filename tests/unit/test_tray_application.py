@@ -88,6 +88,22 @@ class FailingServer(FakeServer):
         raise RuntimeError("server failed")
 
 
+class SystemExitServer(FakeServer):
+    def run(self) -> None:
+        self.events.append("server.run")
+        self.started.set()
+        raise SystemExit(1)
+
+
+class StuckServer(FakeServer):
+    def run(self) -> None:
+        self.events.append("server.run")
+        self.started.set()
+        while not self._stop.is_set():
+            self._stop.wait(0.01)
+        self.events.append("server.return")
+
+
 class FakeIcon:
     def __init__(self, events: list[str]) -> None:
         self.events = events
@@ -249,3 +265,55 @@ def test_server_thread_failure_returns_error_and_releases_resources(tmp_path: Pa
     assert application.run() == 1
     assert context.close_count == 1
     assert guard.release_count == 1
+
+
+def test_server_system_exit_returns_error_and_releases_resources(tmp_path: Path):
+    from app.config import Settings
+    from app.tray.application import TrayApplication
+
+    events: list[str] = []
+    context = FakeContext(events)
+    server = SystemExitServer(events)
+    icon = FakeIcon(events)
+    guard = FakeGuard(events)
+    application = TrayApplication(
+        settings=Settings(data_root=tmp_path),
+        application=SimpleNamespace(state=SimpleNamespace(context=context)),
+        instance_guard=guard,
+        server_factory=lambda _config: server,
+        icon_factory=lambda *_args: icon,
+    )
+    icon.application = application
+
+    assert application.run() == 1
+    assert context.close_count == 1
+    assert guard.release_count == 1
+
+
+def test_shutdown_keeps_mutex_when_server_thread_remains_alive(tmp_path: Path):
+    from app.config import Settings
+    from app.tray.application import TrayApplication
+
+    events: list[str] = []
+    context = FakeContext(events)
+    server = StuckServer(events)
+    icon = FakeIcon(events)
+    guard = FakeGuard(events)
+    application = TrayApplication(
+        settings=Settings(data_root=tmp_path),
+        application=SimpleNamespace(state=SimpleNamespace(context=context)),
+        instance_guard=guard,
+        server_factory=lambda _config: server,
+        icon_factory=lambda *_args: icon,
+        shutdown_timeout=0.01,
+    )
+    icon.application = application
+
+    assert application.run() == 0
+    assert context.close_count == 0
+    assert guard.release_count == 0
+
+    server._stop.set()
+    assert application._server_thread is not None
+    application._server_thread.join(timeout=1)
+    assert not application._server_thread.is_alive()

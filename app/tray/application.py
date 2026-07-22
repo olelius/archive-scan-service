@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 import ctypes
+from ctypes import wintypes
 import logging
 import os
 from pathlib import Path
@@ -39,15 +40,15 @@ class WindowsMutexBackend:
             raise RuntimeError("托盘程序只支持 Windows")
         self._kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
         self._kernel32.CreateMutexW.argtypes = [
-            ctypes.wintypes.LPVOID,
-            ctypes.wintypes.BOOL,
-            ctypes.wintypes.LPCWSTR,
+            wintypes.LPVOID,
+            wintypes.BOOL,
+            wintypes.LPCWSTR,
         ]
-        self._kernel32.CreateMutexW.restype = ctypes.wintypes.HANDLE
-        self._kernel32.ReleaseMutex.argtypes = [ctypes.wintypes.HANDLE]
-        self._kernel32.ReleaseMutex.restype = ctypes.wintypes.BOOL
-        self._kernel32.CloseHandle.argtypes = [ctypes.wintypes.HANDLE]
-        self._kernel32.CloseHandle.restype = ctypes.wintypes.BOOL
+        self._kernel32.CreateMutexW.restype = wintypes.HANDLE
+        self._kernel32.ReleaseMutex.argtypes = [wintypes.HANDLE]
+        self._kernel32.ReleaseMutex.restype = wintypes.BOOL
+        self._kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+        self._kernel32.CloseHandle.restype = wintypes.BOOL
 
     def create(self, name: str) -> tuple[Any, bool]:
         ctypes.set_last_error(0)
@@ -243,6 +244,12 @@ class TrayApplication:
             if server_thread.is_alive() and server is not None:
                 server.force_exit = True
                 server_thread.join(timeout=self._shutdown_timeout)
+            if server_thread.is_alive():
+                LOGGER.error("Uvicorn 服务线程在强制退出后仍未结束，保留单实例句柄")
+                return
+        elif server_thread is not None:
+            LOGGER.error("不能从 Uvicorn 服务线程自身执行有序退出")
+            return
 
         try:
             context = self._application_context()
@@ -344,7 +351,7 @@ class TrayApplication:
             return
         try:
             server.run()
-        except Exception as exc:
+        except BaseException as exc:
             with self._condition:
                 self._server_error = exc
             LOGGER.exception("Uvicorn 服务线程异常退出")

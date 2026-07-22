@@ -48,9 +48,10 @@
 
 1. 标记关闭已开始，避免重复退出路径并停止托盘图标。
 2. 将 `server.should_exit` 设为 `True`，让 Uvicorn 停止接受新请求并等待已有服务关闭。
-3. 等待 Server 线程结束；超时则设置 `force_exit` 并再次等待，避免托盘进程悬挂。
-4. 显式调用 ApplicationContext 的幂等 `close()` 作为未完成 lifespan 或测试替身场景的兜底；真实 FastAPI lifespan 已调用时不会重复关闭资源。
-5. 释放命名互斥体。
+3. 等待 Server 线程结束；超时则设置 `force_exit` 并再次等待。
+4. 如果 Server 线程在两次等待后仍存活，记录稳定错误并保留 ApplicationContext 资源和命名互斥体，避免残留线程继续运行时第二实例抢占端口或共享资源；正常进程入口随后退出，由 Windows 回收进程资源。
+5. Server 线程已结束时，显式调用 ApplicationContext 的幂等 `close()` 作为未完成 lifespan 或测试替身场景的兜底；真实 FastAPI lifespan 已调用时不会重复关闭资源。
+6. 释放命名互斥体。
 
 ApplicationContext 现有 `close()` 会按 WorkerSupervisor、EventHub、SQLite 的顺序清理资源；WorkerSupervisor 已具备优雅 shutdown 和超时强制回收能力，因此托盘层不直接接触 TWAIN DSM、Data Source 或数据库。
 
@@ -70,6 +71,6 @@ ApplicationContext 现有 `close()` 会按 WorkerSupervisor、EventHub、SQLite 
 - 菜单包含三个 Task 12 规定项目，状态文本能反映 Worker 状态。
 - “打开数据目录”向 opener 传递 `Settings.data_root`。
 - 退出先请求 Server 停止并等待，再关闭 ApplicationContext，最后释放互斥体；重复退出只执行一次。
+- Uvicorn 线程以 `SystemExit` 失败和强制退出超时均不会假报成功或提前释放单实例句柄。
 
 测试使用真实业务接口的最小替身，不加载真实 TWAIN DSM，不启动真实 GUI；现有全量测试继续作为回归验证。
-
