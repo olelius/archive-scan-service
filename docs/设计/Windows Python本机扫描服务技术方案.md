@@ -979,66 +979,59 @@ uuid
 
 ## 20. Windows部署
 
-### 20.1 打包
+### 20.1 当前第一版便携式交付
 
-使用64位 PyInstaller打包，客户机不需要预装 Python。
+当前第一版采用 `ArchiveScanService` 便携式目录，不要求客户机预装 Python、Conda、pip 或项目依赖。构建机创建干净的 Python 3.12.13 x64 环境，以非 editable 方式安装生产依赖，再使用 `conda-pack` 生成运行时；交付目录携带 `runtime`、`app`、`run.py`、启动脚本、部署说明、故障排查、依赖锁定和许可证材料。
 
-入口必须包含：
+开发机 `.venv` 不得直接复制到客户机。客户机复制完整目录到最终路径后，必须先运行目录内的：
 
-```python
-if __name__ == "__main__":
-    multiprocessing.freeze_support()
-    main()
+```powershell
+& '.\runtime\Scripts\conda-unpack.exe'
 ```
 
-### 20.2 安装包
+该命令不依赖客户机安装 Conda，用于在最终路径完成运行时前缀处理。交付目录不擅自捆绑来源不明的 `TWAINDSM.DLL`；KODAK i2000 系列 64 位驱动和 TWAIN Data Source 仍需单独安装。
 
-使用 Inno Setup生成 Windows安装包。
+### 20.2 客户机启动和验证
 
-安装程序负责：
+部署顺序固定为：安装扫描仪驱动、复制完整 `ArchiveScanService` 目录、执行 `conda-unpack.exe`、先运行 `启动服务-调试.cmd`，确认无错误后再运行 `启动服务.cmd`。
 
-- 检测64位 Windows。
-- 安装程序文件。
-- 检查 `TWAINDSM.DLL`。
-- 创建当前用户数据目录。
-- 设置当前用户登录后自动启动。
-- 创建开始菜单快捷方式。
-- 安装许可证和第三方组件说明。
-- 提供卸载程序。
+服务只监听 `http://127.0.0.1:17653`。启动后使用 `/api/v1/health` 确认 `code=200` 和 `workerReady=true`，再检查托盘中的服务状态、扫描仪型号、厂商和 Worker PID。
 
-程序运行在当前登录用户会话，不注册 Windows Service。
+当前运行方式仍是登录用户级托盘程序，不注册 Windows Service；“开机启动”由托盘菜单写入当前用户 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`。
 
 ### 20.3 卸载
 
 默认卸载：
 
-- 删除程序文件。
-- 删除自动启动项。
-- 停止托盘和工作子进程。
-- 保留扫描任务和日志。
+- 从托盘关闭服务并退出托盘。
+- 取消“开机启动”。
+- 删除 `ArchiveScanService` 交付目录。
+- 保留 `%LOCALAPPDATA%\ArchiveScanService` 中的扫描任务、原图、缩略图和日志，除非明确要求清理。
 
-只有用户明确选择时才删除本机扫描任务。
+### 20.4 后续可选安装形式
+
+当前不制作 PyInstaller 单文件或 Inno Setup 安装包。未来如果增加安装包，必须继续遵守本方案的回环监听、登录用户托盘、外置 KODAK 驱动和 GPLv2 交付边界，并单独完成干净 Windows 环境验证。
 
 ## 21. GPLv2交付要求
 
 客户试用也按对外分发处理。
 
-试用和正式安装包必须包含：
+试用和正式交付目录必须包含：
 
 ```text
-LICENSES/
+ArchiveScanService/licenses/
 ├─ GPL-2.0.txt
-├─ pytwain-LICENSE.txt
 └─ THIRD-PARTY-NOTICES.md
 ```
 
 同时准备：
 
 ```text
-SOURCE/
-├─ pytwain-2.3.0/
-├─ pytwain项目内修改/
-└─ 构建及依赖说明/
+ArchiveScanService/
+├─ app/
+├─ run.py
+├─ requirements.lock
+└─ source-offer.txt
 ```
 
 要求：

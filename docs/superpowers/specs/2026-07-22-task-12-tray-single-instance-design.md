@@ -41,7 +41,7 @@
 4. 托盘状态菜单项从当前 ApplicationContext/Worker 状态读取就绪状态和 PID，并从设备枚举结果读取扫描仪在线状态、`productName` 和 `manufacturer`；设备查询短暂失败时保留最近一次已知设备信息。
 5. Windows `pystray` 原生菜单不会在右键显示时自动重建；托盘注册 `GUID_DEVINTERFACE_IMAGE` 的 `WM_DEVICECHANGE` 通知，在收到图像设备到达、移除或设备节点变化时调用 `icon.update_menu()`，使外部扫描仪重启后能够重新读取状态。通知注册失败只记录警告，不阻止托盘服务启动。
 6. `ApplicationContext.list_devices()` 在 TWAIN 枚举结果上合并 Windows SetupAPI/CfgMgr32 的 Image 类 PnP 状态；设备在场且配置正常时显示在线，phantom/缺失/配置异常时显示离线。PnP 查询失败只保留原有枚举状态，不阻断服务。
-7. “开机启动”使用当前用户 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`，启用时写入 `ArchiveScanService`，源码运行写入 Python 和 `run.py` 的 Windows 命令行，PyInstaller 运行写入当前可执行文件；取消勾选删除该值，不需要管理员权限。
+7. “开机启动”使用当前用户 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`，启用时写入 `ArchiveScanService`；当前便携式交付写入交付目录内 `runtime\pythonw.exe` 和 `run.py` 的 Windows 命令行，取消勾选删除该值，不需要管理员权限。未来若增加编译型安装包，再由安装包写入当前可执行文件。
 
 目录菜单项使用 `os.startfile(str(settings.data_root))`，不拼接 shell 命令；测试通过注入 opener 检查传入的绝对数据目录。
 

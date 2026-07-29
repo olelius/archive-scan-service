@@ -20,6 +20,7 @@ dist/
 *.egg-info/
 *.spec
 packaging/windows/output/
+/ArchiveScanService/
 
 # IDE
 .idea/

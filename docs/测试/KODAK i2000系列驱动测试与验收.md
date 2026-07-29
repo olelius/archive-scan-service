@@ -4,7 +4,7 @@
 
 ```text
 Windows 64位
-Python 64位打包程序
+Python 3.12.13 64位运行时（客户测试目录内提供）
 64位TWAINDSM.DLL
 KODAK i2000系列 64位TWAIN Data Source（kds_i2000.inf）
 本机SSD
@@ -126,4 +126,4 @@ ADF无纸后本轮正常结束，在同一任务继续扫描，新页面追加�
 
 ## 10. 当前状态
 
-已完成 `pytwain` 导入测试、真实 Data Source 枚举、Task 7.5 真实 Capability 只读冒烟探测、Task 8 单面 JPEG 文件传输闭环，以及 API 和托盘专项自动化测试；300 页压力测试、双面及异常恢复验收、打包测试和托盘真实 GUI 手工验收仍未完成。Task 7.5 和 Task 8 的逐项实测记录已保存；Task 14 正式真机全量验收仍未完成。
+已完成 `pytwain` 导入测试、真实 Data Source 枚举、Task 7.5 真实 Capability 只读冒烟探测、Task 8 单面 JPEG 文件传输闭环、便携式交付目录内容和运行时迁移检查，以及 API 和托盘专项自动化测试；客户机无 Python/Conda 的现场启动、驱动安装、300 页压力测试、双面及异常恢复验收、托盘真实 GUI 手工验收仍未完成。Task 7.5 和 Task 8 的逐项实测记录已保存；Task 14 正式真机全量验收仍未完成。
