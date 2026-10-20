@@ -107,8 +107,17 @@ def api_error_from_domain(exc: BaseException) -> ApiError:
     error_code = getattr(exc, "error_code", None)
     if not isinstance(error_code, str) or not error_code:
         return ApiError("INTERNAL_ERROR")
-    message = _DEFAULT_MESSAGES.get(error_code)
-    return ApiError(error_code, message)
+    from app.scanner.diagnostics import failure_message, safe_diagnostics
+
+    diagnostics = safe_diagnostics(getattr(exc, "diagnostics", None))
+    message = (
+        failure_message(error_code, diagnostics)
+        if diagnostics
+        else _DEFAULT_MESSAGES.get(error_code)
+    )
+    return ApiError(
+        error_code, message, data={"diagnostics": diagnostics} if diagnostics else None
+    )
 
 
 def _payload(error: ApiError) -> dict[str, Any]:
@@ -123,7 +132,9 @@ async def handle_api_error(_: Request, exc: ApiError) -> JSONResponse:
     return JSONResponse(status_code=exc.status_code, content=_payload(exc))
 
 
-async def handle_validation_error(_: Request, __: RequestValidationError) -> JSONResponse:
+async def handle_validation_error(
+    _: Request, __: RequestValidationError
+) -> JSONResponse:
     return JSONResponse(
         status_code=400,
         content=_payload(ApiError("INVALID_REQUEST")),
@@ -134,7 +145,9 @@ async def handle_http_error(_: Request, exc: StarletteHTTPException) -> JSONResp
     if exc.status_code == 404:
         error = ApiError("FILE_NOT_FOUND", "请求的接口或文件不存在")
     else:
-        error = ApiError("INVALID_REQUEST", "HTTP 请求无效", status_code=exc.status_code)
+        error = ApiError(
+            "INVALID_REQUEST", "HTTP 请求无效", status_code=exc.status_code
+        )
     return JSONResponse(status_code=exc.status_code, content=_payload(error))
 
 

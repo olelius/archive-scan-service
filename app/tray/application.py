@@ -13,6 +13,7 @@ import time
 from typing import Any, Protocol
 
 from app.config import Settings
+from app.logging_config import configure_logging
 from app.tray.device_notifications import DeviceChangeMonitor
 from app.tray.startup import create_startup_manager
 
@@ -163,7 +164,9 @@ class TrayApplication:
         self._initial_application = application
         self._application = application
         self._application_factory = application_factory or self._create_application
-        self._use_loaded_application = application is None and application_factory is None
+        self._use_loaded_application = (
+            application is None and application_factory is None
+        )
         self._instance_guard = instance_guard or SingleInstanceGuard()
         self._server_factory = server_factory or self._create_uvicorn_server
         self._icon_factory = icon_factory or self._create_pystray_icon
@@ -454,7 +457,9 @@ class TrayApplication:
                     monitor.stop()
                 except Exception:
                     LOGGER.exception("清理失败的 Windows 设备变化通知监视器失败")
-            LOGGER.warning("注册 Windows 设备变化通知失败，继续运行托盘服务", exc_info=True)
+            LOGGER.warning(
+                "注册 Windows 设备变化通知失败，继续运行托盘服务", exc_info=True
+            )
 
     def _stop_device_monitor(self) -> None:
         with self._condition:
@@ -486,7 +491,11 @@ class TrayApplication:
 
         snapshot = self._get_status_snapshot()
         status = snapshot["status"]
-        if snapshot["status_error"] or not isinstance(status, Mapping) or not status.get("ready"):
+        if (
+            snapshot["status_error"]
+            or not isinstance(status, Mapping)
+            or not status.get("ready")
+        ):
             return "扫描仪状态：未就绪"
         devices = snapshot["devices"]
         if any(device.get("online") is True for device in devices):
@@ -746,7 +755,9 @@ def create_tray_image() -> Any:
 def main() -> int:
     """托盘程序进程入口。"""
 
-    return TrayApplication().run()
+    settings = Settings()
+    configure_logging(settings)
+    return TrayApplication(settings=settings).run()
 
 
 __all__ = [

@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>扫描接口测试台</title>
+  <style>
+    :root { --bg:#f4f6fa; --surface:#fff; --text:#17243b; --muted:#56647a; --line:#dce3ed; --blue:#235acb; --blue-soft:#edf3ff; --danger:#b42332; --success:#167047; --radius:12px; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:20px; }
+    body { margin:0; background:var(--bg); color:var(--text); font:15px/1.6 system-ui,"Microsoft YaHei",sans-serif; }
+    button,input,select,textarea { font:inherit; }
+    button { min-height:42px; padding:9px 15px; border:1px solid var(--line); border-radius:7px; background:var(--surface); color:var(--text); cursor:pointer; transition:background .15s,border-color .15s; }
+    button:hover { background:var(--blue-soft); border-color:#9db5e6; }
+    button:disabled { cursor:wait; opacity:.55; }
+    button.primary { background:var(--blue); border-color:var(--blue); color:#fff; }
+    button.primary:hover { background:#1947a7; }
+    button.danger { color:var(--danger); border-color:#edc5cb; }
+    button.danger:hover { background:#fff1f2; }
+    :focus-visible { outline:3px solid #709cfa; outline-offset:3px; }
+    a { color:var(--blue); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .shell { max-width:1440px; margin:auto; padding:32px 28px 48px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:24px; }
+    .brand { display:flex; gap:15px; align-items:center; }
+    .brand-mark { background:var(--blue); color:white; width:48px; height:48px; display:grid; place-items:center; border-radius:12px; flex:none; }
+    h1 { font-size:26px; margin:0; letter-spacing:.01em; }
+    .subtitle { margin:3px 0 0; color:var(--muted); font-size:14px; }
+    .header-links { display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; font-size:14px; }
+    .badge { display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); background:white; padding:5px 10px; border-radius:24px; font-size:13px; white-space:nowrap; }
+    .badge::before { content:""; width:7px; height:7px; border-radius:50%; background:#8290a5; }
+    .badge.good { color:var(--success); background:#edf8f1; border-color:#c6e7d4; }
+    .badge.good::before { background:var(--success); }
+    .badge.bad { color:var(--danger); background:#fff1f2; border-color:#edc5cb; }
+    .badge.bad::before { background:var(--danger); }
+    nav { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px; }
+    nav a { color:var(--muted); padding:7px 12px; border-radius:6px; background:#eaf0f7; font-size:14px; }
+    nav a:hover { background:#dfe9f9; text-decoration:none; color:var(--blue); }
+    .layout { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr); gap:22px; align-items:start; }
+    main { display:grid; gap:18px; min-width:0; }
+    .card { padding:22px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+    .section-heading { display:flex; gap:12px; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
+    h2 { margin:0; font-size:18px; font-weight:650; }
+    .section-count { font-size:12px; color:var(--muted); white-space:nowrap; }
+    .help { color:var(--muted); font-size:13px; margin:8px 0 0; }
+    .row { display:flex; gap:9px; flex-wrap:wrap; align-items:center; }
+    .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:14px; }
+    .field { display:flex; flex-direction:column; gap:5px; min-width:0; }
+    .field.wide { grid-column:1/-1; }
+    label,.field-label { font-size:13px; font-weight:600; }
+    input,select,textarea { width:100%; min-width:0; min-height:42px; border:1px solid #cbd5e3; background:#fff; border-radius:6px; padding:9px 10px; color:var(--text); }
+    textarea { resize:vertical; }
+    .mono,code,pre,textarea { font-family:Consolas,"Cascadia Code",monospace; font-size:12px; }
+    code { overflow-wrap:anywhere; }
+    .note { margin:0 0 18px; color:#34517a; background:var(--blue-soft); padding:12px 16px; border-radius:8px; font-size:13px; }
+    .divider { border:0; border-top:1px solid var(--line); margin:18px 0; }
+    summary { cursor:pointer; color:var(--muted); font-size:13px; padding:3px 0; }
+    details[open] summary { margin-bottom:10px; }
+    .parameter-box { background:#f8fafc; padding:15px; border:1px solid var(--line); border-radius:8px; margin:16px 0; }
+    .parameter-box h3 { margin:0 0 12px; font-size:14px; }
+    .task-state { margin-top:14px; padding:10px 12px; border-radius:6px; background:#f1f5fa; font-size:13px; overflow-wrap:anywhere; }
+    .page-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; max-height:240px; overflow:auto; }
+    .page-option { text-align:left; font-size:12px; min-width:125px; }
+    .page-option[aria-pressed="true"] { background:var(--blue-soft); border-color:var(--blue); color:var(--blue); }
+    .preview { margin-top:15px; padding:14px; border:1px dashed #c5cfde; border-radius:8px; text-align:center; }
+    .preview img { display:block; max-width:100%; max-height:480px; object-fit:contain; margin:0 auto 10px; }
+    [hidden] { display:none !important; }
+    aside { position:sticky; top:20px; min-width:0; }
+    .console-heading { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .console-heading h2 { font-size:17px; }
+    .console-heading button { font-size:12px; min-height:34px; padding:5px 9px; }
+    #feedback { padding:11px 12px; margin:14px 0; border-radius:6px; background:#f1f5fa; font-size:13px; overflow-wrap:anywhere; }
+    #feedback.error { color:var(--danger); background:#fff1f2; }
+    .request-line { color:var(--muted); overflow-wrap:anywhere; margin:12px 0; font-size:12px; }
+    pre { margin:8px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.6; }
+    #response { background:#142135; color:#d9e5f8; border-radius:8px; padding:16px; max-height:510px; min-height:230px; overflow:auto; }
+    #requestBody { background:#f2f5f9; padding:10px; border-radius:6px; max-height:160px; overflow:auto; }
+    .request-history { list-style:none; padding:0; margin:10px 0 0; max-height:180px; overflow:auto; }
+    .request-history li { padding:7px 0; border-bottom:1px solid #edf0f5; font:12px/1.5 Consolas,monospace; overflow-wrap:anywhere; }
+    .event-log { margin:14px 0 0; max-height:280px; overflow:auto; background:#f5f7fb; border:1px solid var(--line); border-radius:7px; padding:12px; font:12px/1.6 Consolas,monospace; }
+    .event-entry { padding:8px 0; border-bottom:1px solid var(--line); overflow-wrap:anywhere; white-space:pre-wrap; }
+    .check { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:400; margin:10px 0; }
+    .check input { min-height:0; width:16px; height:16px; }
+    footer { margin-top:20px; color:var(--muted); font-size:12px; text-align:center; }
+    @media (max-width:1000px) { .layout { grid-template-columns:1fr; } aside { position:static; } #response { min-height:180px; max-height:400px; } }
+    @media (max-width:560px) { .shell { padding:20px 14px 32px; } header { align-items:flex-start; flex-direction:column; gap:14px; } h1 { font-size:23px; } .card { padding:17px; } .fields { grid-template-columns:1fr; } .row button { flex:1 1 auto; } .section-heading { gap:8px; } }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } * { transition:none !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6zM17 12h2"/></svg></div>
+        <div><h1>扫描接口测试台</h1><p class="subtitle">档案本机扫描服务 · 全部 17 个 HTTP 接口与 WebSocket</p></div>
+      </div>
+      <div class="header-links"><span id="healthBadge" class="badge" role="status">服务待检查</span><a href="/docs" target="_blank" rel="noopener">接口文档 ↗</a></div>
+    </header>
+    <nav aria-label="测试区域"><a href="#service">服务</a><a href="#devices">设备与能力</a><a href="#tasks">任务与扫描</a><a href="#pages">页面与文件</a><a href="#events">实时事件</a></nav>
+    <p class="note">操作顺序：读取设备 → 创建任务 → 开始扫描。ADF 会持续扫描到无纸；打开此页面不会自动进纸。接口地址：<code>http://127.0.0.1:17653</code></p>
+    <div class="layout">
+      <main id="main">
+        <section class="card" id="service" aria-labelledby="serviceTitle">
+          <div class="section-heading"><h2 id="serviceTitle">服务状态</h2><span class="section-count">2 个接口</span></div>
+          <div class="row">
+            <button data-action="health" data-method="GET" data-path="/api/v1/health">检查健康状态</button>
+            <button data-action="info" data-method="GET" data-path="/api/v1/info">查看服务信息</button>
+          </div>
+          <p class="help" id="serviceSummary">工作进程、版本与运行状态将显示在请求结果中。</p>
+        </section>
+        <section class="card" id="devices" aria-labelledby="devicesTitle">
+          <div class="section-heading"><h2 id="devicesTitle">设备与能力</h2><span class="section-count">3 个接口</span></div>
+          <div class="fields">
+            <div class="field wide"><label for="deviceSelect">已发现的扫描仪</label><select id="deviceSelect"><option value="">点击「读取设备」加载扫描仪</option></select></div>
+            <div class="field wide"><label for="deviceId">设备 ID（可手动填写）</label><input id="deviceId" class="mono" autocomplete="off" placeholder="选择设备后自动填写"></div>
+          </div>
+          <div class="row">
+            <button data-action="devices" data-method="GET" data-path="/api/v1/devices">读取设备</button>
+            <button data-action="capabilities" data-method="GET" data-path="/api/v1/devices/{device_id}/capabilities">查询全部能力</button>
+            <button data-action="resolve" data-method="POST" data-path="/api/v1/devices/{device_id}/capabilities/resolve">应用参数并重查能力</button>
+          </div>
+          <p class="help">能力结果包含标准及厂商私有 Capability。「应用参数」使用下方扫描参数，只设置参数，不进纸。</p>
+        </section>
+        <section class="card" id="tasks" aria-labelledby="tasksTitle">
+          <div class="section-heading"><h2 id="tasksTitle">任务与扫描</h2><span class="section-count">7 个接口</span></div>
+          <div class="fields">
+            <div class="field wide"><label for="taskSelect">历史任务</label><select id="taskSelect"><option value="">点击「读取任务」加载已有任务</option></select></div>
+            <div class="field wide"><label for="taskId">当前任务 ID</label><input id="taskId" class="mono" autocomplete="off" placeholder="创建或选择任务后自动填写"></div>
+          </div>
+          <div class="row">
+            <button data-action="tasks" data-method="GET" data-path="/api/v1/tasks">读取任务</button>
+            <button data-action="task" data-method="GET" data-path="/api/v1/tasks/{task_id}">查询当前任务</button>
+          </div>
+          <div class="parameter-box">
+            <h3>本次扫描参数</h3>
+            <div class="fields">
+              <div class="field"><label for="feedMode">进纸模式</label><select id="feedMode"><option value="adf_simplex">ADF 单面连续扫描</option><option value="adf_duplex">ADF 双面连续扫描</option><option value="flatbed">平板（每轮一页）</option></select></div>
+              <div class="field"><label for="resolution">分辨率（DPI）</label><input id="resolution" type="number" min="1" step="1" value="300"></div>
+              <div class="field"><label for="pixelType">颜色模式</label><select id="pixelType"><option value="">使用设备当前值</option><option value="2">彩色</option><option value="1">灰度</option><option value="0">黑白</option></select></div>
+              <div class="field"><label for="jpegQuality">JPEG 质量（可留空）</label><input id="jpegQuality" type="number" step="1" placeholder="使用设备当前值"></div>
+            </div>
+            <details><summary>附加配置与自定义任务 ID</summary>
+              <div class="field"><label for="extraSettings">附加参数（JSON 对象，可覆盖上面的字段）</label><textarea id="extraSettings" rows="4" spellcheck="false">{}</textarea></div>
+              <p class="help">例如 {"xResolution":300,"yResolution":300}。允许值以当前设备能力和实际设置结果为准。</p>
+              <div class="field" style="margin-top:12px"><label for="newTaskId">新任务 ID（留空由服务生成，与当前任务 ID 独立）</label><input id="newTaskId" class="mono" autocomplete="off" placeholder="可留空"></div>
+            </details>
+          </div>
+          <div class="row">
+            <button data-action="create" data-method="POST" data-path="/api/v1/tasks">创建新任务</button>
+            <button class="primary" data-action="start" data-method="POST" data-path="/api/v1/tasks/{task_id}/scan/start">开始扫描</button>
+            <button data-action="stop" data-method="POST" data-path="/api/v1/tasks/{task_id}/scan/stop">停止扫描</button>
+            <button data-action="complete" data-method="POST" data-path="/api/v1/tasks/{task_id}/scan/complete">标记完成</button>
+          </div>
+          <div class="task-state" id="taskSummary">尚未选择任务。创建新任务不会自动开始扫描。</div>
+          <hr class="divider">
+          <button class="danger" data-action="deleteTask" data-method="DELETE" data-path="/api/v1/tasks/{task_id}">删除当前任务及文件</button>
+          <p class="help">删除会清除任务记录、原图与缩略图，执行前会再次确认。</p>
+        </section>
+        <section class="card" id="pages" aria-labelledby="pagesTitle">
+          <div class="section-heading"><h2 id="pagesTitle">页面与文件</h2><span class="section-count">5 个接口</span></div>
+          <div class="fields">
+            <div class="field"><label for="afterSequence">增量序号 afterSequence（可留空）</label><input id="afterSequence" type="number" min="0" step="1" placeholder="留空查询全部；0 表示从头查询"></div>
+            <div class="field"><label for="pageId">当前页面 ID</label><input id="pageId" class="mono" autocomplete="off" placeholder="从下方页面列表选择，或手动填写"></div>
+          </div>
+          <div class="row">
+            <button data-action="pages" data-method="GET" data-path="/api/v1/tasks/{task_id}/pages">读取页面列表</button>
+            <button data-action="page" data-method="GET" data-path="/api/v1/tasks/{task_id}/pages/{page_id}">查询页面详情</button>
+            <button data-action="thumbnail" data-method="GET" data-path="/api/v1/tasks/{task_id}/pages/{page_id}/thumbnail">读取缩略图</button>
+            <button data-action="original" data-method="GET" data-path="/api/v1/tasks/{task_id}/pages/{page_id}/original">读取原图</button>
+            <button class="danger" data-action="deletePage" data-method="DELETE" data-path="/api/v1/tasks/{task_id}/pages/{page_id}">删除当前页</button>
+          </div>
+          <p class="help" id="pagesSummary">读取后点击页码选用页面。删除不会重排其他页面的 ID 和原始序号。</p>
+          <div class="page-list" id="pagesList" aria-label="已读取的页面"></div>
+          <div class="preview" id="preview" hidden><img id="previewImage" alt="当前扫描页面预览"><a id="downloadImage" download>下载当前图片</a></div>
+        </section>
+        <section class="card" id="events" aria-labelledby="eventsTitle">
+          <div class="section-heading"><h2 id="eventsTitle">实时事件</h2><span id="socketBadge" class="badge">未连接</span></div>
+          <code>WS /api/v1/events?taskId=任务ID（可选）</code>
+          <label class="check"><input id="filterEvents" type="checkbox">只订阅当前任务（连接前选择）</label>
+          <label class="check"><input id="autoRefresh" type="checkbox" checked>收到当前任务事件后，自动刷新任务状态与页面列表</label>
+          <div class="row">
+            <button id="connectEvents" data-websocket="/api/v1/events">连接事件</button>
+            <button id="disconnectEvents">断开事件</button>
+            <button id="clearEvents">清空事件显示</button>
+          </div>
+          <p class="help">开始扫描时会连接事件流（尚未连接时）。只保留最近 100 条事件，断开订阅不会停止扫描。</p>
+          <div class="event-log" id="eventLog" role="log" aria-label="实时事件日志">等待连接事件流…</div>
+        </section>
+      </main>
+      <aside class="card" aria-labelledby="consoleTitle">
+        <div class="console-heading"><h2 id="consoleTitle">请求与响应</h2><button id="copyResponse">复制响应</button></div>
+        <div id="feedback" role="status" aria-live="polite">点击左侧按钮调用接口。所有请求都发送到本机服务。</div>
+        <div class="request-line" id="requestLine">暂无请求</div>
+        <details><summary>请求体</summary><pre id="requestBody">无请求体</pre></details>
+        <pre id="response" tabindex="0" aria-label="接口响应内容">等待接口响应…</pre>
+        <details style="margin-top:16px"><summary>最近请求（最多 30 条）</summary><ol class="request-history" id="requestHistory"></ol></details>
+      </aside>
+    </div>
+    <footer>仅用于本机联调 · 原图由扫描仪输出，测试页只读取和展示 · 页面及服务由操作者手动关闭</footer>
+  </div>
+  <script>
+    "use strict";
+    const API = "http://127.0.0.1:17653";
+    const $ = id => document.getElementById(id);
+    const tasks = new Map();
+    const pages = new Map();
+    const stateNames = { CREATED:"已创建", SCANNING:"扫描中", STOPPING:"正在停止", STOPPED:"已停止", COMPLETED:"已完成", FAILED:"失败", CANCELLED:"已取消" };
+    let socket = null, socketFilter = "", socketEpoch = 0, imageUrl = null, responseText = "", requestNumber = 0, shownRequest = 0, refreshTimer = null, pageTaskId = "";
+    const feedback = (message, error = false) => { $("feedback").textContent = message; $("feedback").classList.toggle("error", error); };
+    function identifier(field) {
+      const input = $(field), value = input.value.trim();
+      const names = { deviceId:"设备 ID", taskId:"任务 ID", pageId:"页面 ID", newTaskId:"新任务 ID" };
+      if (!value || value === "." || value === ".." || /[/\\]/.test(value)) {
+        input.focus(); throw new Error(`请填写有效的${names[field]}，不能包含路径分隔符。`);
+      }
+      return value;
+    }
+    function settings() {
+      const dpi = Number($("resolution").value);
+      if (!Number.isInteger(dpi) || dpi <= 0) throw new Error("分辨率必须是正整数。");
+      const value = { feedMode:$("feedMode").value, resolution:dpi };
+      for (const key of ["pixelType", "jpegQuality"]) {
+        if ($(key).value !== "") {
+          const number = Number($(key).value);
+          if (!Number.isInteger(number)) throw new Error("颜色模式和 JPEG 质量必须是整数。");
+          value[key] = number;
+        }
+      }
+      let extra;
+      try { extra = JSON.parse($("extraSettings").value || "{}"); }
+      catch { throw new Error("附加参数不是有效 JSON，请检查引号、逗号和括号。"); }
+      if (!extra || Array.isArray(extra) || typeof extra !== "object") throw new Error("附加参数必须是 JSON 对象。");
+      return { ...value, ...extra };
+    }
+    function pathFor(template) {
+      const fields = { device_id:"deviceId", task_id:"taskId", page_id:"pageId" };
+      return template.replace(/\{(device_id|task_id|page_id)\}/g, (_, name) => encodeURIComponent(identifier(fields[name])));
+    }
+    function displayResponse(number, method, path, body, result, status, duration, failed = false) {
+      const history = document.createElement("li");
+      history.textContent = `${new Date().toLocaleTimeString("zh-CN")} · ${method} ${path} · ${status} · ${duration}ms`;
+      $("requestHistory").prepend(history);
+      while ($("requestHistory").children.length > 30) $("requestHistory").lastChild.remove();
+      if (number < shownRequest) return;
+      shownRequest = number;
+      $("requestLine").textContent = `${method} ${API}${path} · ${status} · ${duration}ms`;
+      $("requestBody").textContent = body === undefined ? "无请求体" : JSON.stringify(body, null, 2);
+      responseText = typeof result === "string" ? result : JSON.stringify(result, null, 2);
+      $("response").textContent = responseText;
+      feedback(failed ? "请求未成功，请查看响应中的错误说明。" : "请求成功，响应已更新。", failed);
+    }
+    async function request(method, path, body) {
+      const number = ++requestNumber, started = performance.now(), controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000);
+      let recorded = false;
+      try {
+        const options = { method, signal:controller.signal, cache:"no-store" };
+        if (body !== undefined) { options.headers = { "Content-Type":"application/json" }; options.body = JSON.stringify(body); }
+        const response = await fetch(API + path, options);
+        const isImage = response.headers.get("content-type")?.startsWith("image/");
+        let result, blob;
+        if (isImage && response.ok) { blob = await response.blob(); result = { contentType:blob.type, fileSize:blob.size, message:"图片已载入左侧预览，可下载原始响应文件。" }; }
+        else {
+          const text = await response.text();
+          try { result = JSON.parse(text); } catch { result = text; }
+        }
+        const failed = !response.ok || (result && typeof result === "object" && "code" in result && result.code !== 200);
+        displayResponse(number, method, path, body, result, response.status, Math.round(performance.now() - started), failed);
+        recorded = true;
+        if (failed) throw new Error(result?.message || `HTTP ${response.status}，请查看响应。`);
+        return { data:result?.data, result, blob };
+      } catch (error) {
+        if (!recorded) {
+          const message = error.name === "AbortError" ? "请求超过 60 秒，已停止等待；请查询任务状态确认服务端结果。" : `无法连接本机服务：${error.message}。请确认服务运行，并从 ${API}/test 打开此页。`;
+          displayResponse(number, method, path, body, { message }, "连接失败", Math.round(performance.now() - started), true);
+          throw new Error(message);
+        }
+        throw error;
+      } finally { clearTimeout(timeout); }
+    }
+    function option(value, label) { const item = document.createElement("option"); item.value = value; item.textContent = label; return item; }
+    function updateTaskChoices() {
+      $("taskSelect").replaceChildren(option("", "选择任务，或手动填写下方任务 ID"));
+      for (const task of tasks.values()) $("taskSelect").append(option(task.taskId, `${stateNames[task.status] || task.status} · ${task.pageCount ?? 0} 页 · ${task.taskId}`));
+      $("taskSelect").value = tasks.has($("taskId").value.trim()) ? $("taskId").value.trim() : "";
+    }
+    function clearPreview() {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+      imageUrl = null; $("previewImage").removeAttribute("src"); $("downloadImage").removeAttribute("href"); $("preview").hidden = true;
+    }
+    function clearPages() { pages.clear(); pageTaskId = $("taskId").value.trim(); $("pageId").value = ""; clearPreview(); renderPages(); }
+    function selectTask(id) { if ($("taskId").value.trim() !== id) { $("taskId").value = id; clearPages(); } updateTaskChoices(); }
+    function showTask(task) {
+      tasks.set(task.taskId, task); updateTaskChoices();
+      if (task.taskId === $("taskId").value.trim()) $("taskSummary").textContent = `${stateNames[task.status] || task.status} · 已登记 ${task.pageCount ?? 0} 页 · ${task.taskId}${task.errorCode ? ` · ${task.errorCode}` : ""}`;
+    }
+    function renderPages() {
+      const fragment = document.createDocumentFragment();
+      for (const page of [...pages.values()].sort((a, b) => a.sequence - b.sequence)) {
+        const button = document.createElement("button"); button.className = "page-option";
+        button.textContent = `第 ${page.sequence} 页 · ${page.width} × ${page.height}`;
+        button.title = page.pageId; button.setAttribute("aria-pressed", String(page.pageId === $("pageId").value.trim()));
+        button.addEventListener("click", () => { clearPreview(); $("pageId").value = page.pageId; renderPages(); });
+        fragment.append(button);
+      }
+      $("pagesList").replaceChildren(fragment);
+      $("pagesSummary").textContent = pages.size ? `当前已加载 ${pages.size} 页。点击页码选择，再读取缩略图或原图。` : "尚无已加载页面。点击「读取页面列表」查询当前任务。";
+    }
+    function mergePages(data, taskId, incremental) {
+      if (taskId !== $("taskId").value.trim()) return;
+      if (pageTaskId !== taskId || !incremental) { pages.clear(); pageTaskId = taskId; }
+      for (const page of data.items || data.pages || []) pages.set(page.pageId, page);
+      if (!pages.has($("pageId").value.trim())) { $("pageId").value = ""; clearPreview(); }
+      renderPages();
+    }
+    async function execute(button) {
+      const action = button.dataset.action, taskAtStart = $("taskId").value.trim(), pageAtStart = $("pageId").value.trim();
+      let path = pathFor(button.dataset.path), body;
+      if (action === "create") { body = { deviceId:identifier("deviceId"), scanParamsSnapshot:settings() }; if ($("newTaskId").value.trim()) body.taskId = identifier("newTaskId"); }
+      if (action === "start" || action === "resolve") body = { settings:settings() };
+      if (action === "start") {
+        const mode = body.settings.feedMode, duplex = mode === "adf_duplex" ? "ADF 双面" : mode === "flatbed" ? "平板单页" : "ADF 单面";
+        if (!confirm(`即将对当前任务开始${duplex}扫描。ADF 将连续扫描到无纸。\n任务：${taskAtStart}\n请确认测试纸已放好。`)) return;
+        if (!socket || socket.readyState > WebSocket.OPEN) connectEvents();
+      }
+      if (action === "deleteTask" && !confirm(`永久删除任务 ${taskAtStart} 及其全部原图、缩略图和记录？`)) return;
+      if (action === "deletePage" && !confirm(`永久删除当前任务中的页面 ${identifier("pageId")} 及其原图、缩略图？`)) return;
+      const after = $("afterSequence").value.trim();
+      if (action === "pages" && after !== "") {
+        if (!Number.isSafeInteger(Number(after)) || Number(after) < 0) throw new Error("增量序号必须是非负整数。");
+        path += `?afterSequence=${encodeURIComponent(after)}`;
+      }
+      const { data, result, blob } = await request(button.dataset.method, path, body);
+      if (action === "health") {
+        $("healthBadge").textContent = data.workerReady ? "服务已就绪" : "扫描组件未就绪";
+        $("healthBadge").className = `badge ${data.workerReady ? "good" : "bad"}`;
+        $("serviceSummary").textContent = `服务状态：${data.status} · 扫描工作进程：${data.workerPid ?? "尚未启动"}`;
+      } else if (action === "info") $("serviceSummary").textContent = `版本 ${data.version} · ${data.architecture} · ${data.protocol} · ${data.host}:${data.port}`;
+      else if (action === "devices") {
+        const devices = data.items || data.devices || [], current = $("deviceId").value.trim();
+        $("deviceSelect").replaceChildren(option("", devices.length ? "请选择扫描仪" : "没有发现扫描仪"));
+        for (const device of devices) $("deviceSelect").append(option(device.deviceId, `${device.productName} · ${device.online ? "在线" : "离线"}`));
+        const selected = devices.find(device => device.deviceId === current) || devices.find(device => device.online) || devices[0];
+        if (selected) { $("deviceSelect").value = selected.deviceId; $("deviceId").value = selected.deviceId; }
+      } else if (action === "tasks") { tasks.clear(); for (const task of data.items || data.tasks || []) tasks.set(task.taskId, task); updateTaskChoices(); }
+      else if (action === "create") { selectTask(data.taskId); showTask(data); }
+      else if (["task", "start", "stop", "complete"].includes(action)) showTask(data);
+      else if (action === "pages") mergePages(data, taskAtStart, after !== "");
+      else if (action === "page") { if (taskAtStart === $("taskId").value.trim()) { pages.set(data.pageId, data); pageTaskId = taskAtStart; renderPages(); } }
+      else if (action === "deleteTask") { tasks.delete(taskAtStart); if ($("taskId").value.trim() === taskAtStart) { selectTask(""); $("taskSummary").textContent = "任务已删除，请创建或选择其他任务。"; } updateTaskChoices(); }
+      else if (action === "deletePage") { if (taskAtStart === $("taskId").value.trim()) { pages.delete(result.data.pageId); $("pageId").value = ""; clearPreview(); renderPages(); } }
+      else if (blob && taskAtStart === $("taskId").value.trim() && pageAtStart === $("pageId").value.trim()) { clearPreview(); imageUrl = URL.createObjectURL(blob); $("previewImage").src = imageUrl; $("previewImage").alt = `${action === "original" ? "原图" : "缩略图"}：${pageAtStart}`; $("downloadImage").href = imageUrl; $("downloadImage").download = `${pageAtStart}-${action}.jpg`; $("preview").hidden = false; }
+    }
+    function eventEntry(message) {
+      const log = $("eventLog"); if (!log.querySelector(".event-entry")) log.replaceChildren();
+      const row = document.createElement("div"); row.className = "event-entry";
+      row.textContent = `${new Date().toLocaleTimeString("zh-CN")}  ${typeof message === "string" ? message : JSON.stringify(message)}`;
+      log.append(row); while (log.children.length > 100) log.firstChild.remove(); log.scrollTop = log.scrollHeight;
+    }
+    function socketStatus(text, good = false, bad = false) { $("socketBadge").textContent = text; $("socketBadge").className = `badge${good ? " good" : bad ? " bad" : ""}`; }
+    function connectEvents() {
+      const filter = $("filterEvents").checked ? `?taskId=${encodeURIComponent(identifier("taskId"))}` : "";
+      if (socket && socket.readyState <= WebSocket.OPEN) {
+        if (socketFilter === filter) return;
+        socket.close(1000);
+      }
+      const epoch = ++socketEpoch, connection = new WebSocket(API.replace("http:", "ws:") + "/api/v1/events" + filter);
+      socket = connection; socketFilter = filter; socketStatus("连接中");
+      connection.onopen = () => { if (epoch !== socketEpoch) return; socketStatus("已连接", true); eventEntry(`事件流已连接${filter ? "，仅订阅当前任务" : "，订阅全部任务"}`); };
+      connection.onclose = event => { if (epoch !== socketEpoch) return; socketStatus("已断开"); eventEntry(`事件流已断开（${event.code}）`); socket = null; };
+      connection.onerror = () => { if (epoch !== socketEpoch) return; socketStatus("连接异常", false, true); eventEntry("事件连接异常，请确认服务运行后重新连接。"); };
+      connection.onmessage = event => {
+        if (epoch !== socketEpoch) return;
+        let message; try { message = JSON.parse(event.data); } catch { message = event.data; }
+        eventEntry(message);
+        if ($("autoRefresh").checked && message && typeof message === "object" && message.taskId === $("taskId").value.trim() && ["page_completed", "page_deleted", "task_completed", "task_failed", "task_stopped"].includes(message.event)) {
+          clearTimeout(refreshTimer); const id = message.taskId;
+          refreshTimer = setTimeout(() => refreshTaskAndPages(id).catch(error => feedback(error.message, true)), 300);
+        }
+      };
+    }
+    async function refreshTaskAndPages(id) {
+      if (id !== $("taskId").value.trim()) return;
+      const encoded = encodeURIComponent(id);
+      const task = await request("GET", `/api/v1/tasks/${encoded}`);
+      showTask(task.data);
+      if (id !== $("taskId").value.trim()) return;
+      const result = await request("GET", `/api/v1/tasks/${encoded}/pages`);
+      mergePages(result.data, id, false);
+    }
+    document.querySelectorAll("button[data-method]").forEach(button => button.addEventListener("click", async () => {
+      const text = button.textContent; button.disabled = true; button.textContent = "请求中…";
+      try { await execute(button); } catch (error) { feedback(error.message, true); if (button.dataset.action === "health") { $("healthBadge").textContent = "服务不可用"; $("healthBadge").className = "badge bad"; } }
+      finally { button.disabled = false; button.textContent = text; }
+    }));
+    $("deviceSelect").addEventListener("change", event => { $("deviceId").value = event.target.value; });
+    $("taskSelect").addEventListener("change", event => { selectTask(event.target.value); const task = tasks.get(event.target.value); if (task) showTask(task); });
+    $("taskId").addEventListener("input", () => { if (pageTaskId !== $("taskId").value.trim()) { clearPages(); $("taskSummary").textContent = "任务 ID 已更改，请查询当前任务。"; } updateTaskChoices(); });
+    $("pageId").addEventListener("input", () => { clearPreview(); renderPages(); });
+    $("connectEvents").addEventListener("click", () => { try { connectEvents(); } catch (error) { feedback(error.message, true); } });
+    $("disconnectEvents").addEventListener("click", () => { ++socketEpoch; if (socket) { socket.close(1000); socket = null; } clearTimeout(refreshTimer); socketStatus("已断开"); eventEntry("已手动断开事件流。"); });
+    $("clearEvents").addEventListener("click", () => { $("eventLog").replaceChildren(); eventEntry("事件显示已清空，订阅状态不变。"); });
+    $("copyResponse").addEventListener("click", async () => { try { if (!responseText) throw new Error("还没有可复制的响应。"); await navigator.clipboard.writeText(responseText); feedback("响应已复制。"); } catch (error) { feedback(`复制失败：${error.message}，可直接选中响应文本复制。`, true); } });
+    window.addEventListener("beforeunload", () => { if (socket) socket.close(1000); if (imageUrl) URL.revokeObjectURL(imageUrl); });
+    if (location.origin === API) document.querySelector('[data-action="health"]').click();
+    else feedback(`请通过 ${API}/test 打开此页，以便同源调用扫描服务。`, true);
+  </script>
+</body>
+</html>

@@ -78,13 +78,13 @@ Run: `D:\archive-scan-service\ArchiveScanService\runtime\python.exe -c "import s
 
 迁移复核：从原始 `ArchiveScanRuntime.zip` 解出运行时，在新路径执行 `conda-unpack.exe` 后，`fastapi`、`twain`、`PIL`、`pystray` 导入通过，`sys.prefix` 和模块路径均指向新路径。
 
-- [ ] **Step 3：在不干扰现有服务的前提下启动交付目录并检查 `http://127.0.0.1:17653/api/v1/health`**
+- [x] **Step 3：在不干扰现有服务的前提下启动交付目录并检查 `http://127.0.0.1:17653/api/v1/health`**
 
-当前固定端口 `127.0.0.1:17653` 的监听进程已核对为 `D:\archive-scan-service\.venv\python.exe`（开发环境），本次不停止该进程，也不把它的健康响应冒充成交付目录验证；客户机部署后按《部署流程.md》执行交付目录健康检查。
+2026-10-20 已使用 `D:\archive-scan-service\ArchiveScanService\runtime\python.exe run.py` 从便携目录直接启动服务，健康接口返回 `code=200`、`workerReady=true`，单页及原生六页扫描证据见真机实测记录。后续已启用完整测试页 `http://127.0.0.1:17653/test`，服务保持运行。此结果仅覆盖开发机直接启动，不代表 `.cmd` 启动脚本或客户机无 Python/Conda 的部署验证通过。
 
 - [x] **Step 4：保留交付目录供客户复制**
 
-本次没有启动独立交付验证进程，因此不执行停止操作；交付目录保留在 `D:\archive-scan-service\ArchiveScanService`。
+便携服务与交付目录均保留在 `D:\archive-scan-service\ArchiveScanService`，Git 收尾不停止服务、不删除交付目录或扫描数据。
 
 ### Task 5：同步项目文档
 

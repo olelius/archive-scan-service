@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.api.dependencies import ApplicationContext
 from app.api.devices import router as devices_router
@@ -52,6 +54,17 @@ def create_app(*, context: ApplicationContext | None = None) -> FastAPI:
     app.include_router(tasks_router, prefix="/api/v1")
     app.include_router(pages_router, prefix="/api/v1")
     app.include_router(events_router, prefix="/api/v1")
+
+    @app.get("/test", include_in_schema=False)
+    def scanner_test_page() -> FileResponse:
+        """提供同源扫描接口测试页，不主动驱动扫描仪。"""
+
+        return FileResponse(
+            Path(__file__).resolve().parent / "web" / "scanner-test.html",
+            media_type="text/html",
+            headers={"Cache-Control": "no-store"},
+        )
+
     return app
 
 

@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "timeZone": "Asia/Shanghai",
+  "caseName": "KODAK i2000 原生 ADF 单面连续扫描修复验证",
+  "sourceProductName": "KODAK Scanner: i2000",
+  "operatorConfirmedSheetCount": 6,
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/tasks/task-aef80ef33ee5461b9f342b45f8971d2c/scan/start",
+    "body": {
+      "settings": {
+        "feedMode": "adf_simplex",
+        "resolution": 300
+      }
+    }
+  },
+  "fixes": [
+    "新页面使用全局唯一 pageId，避免跨任务第一页主键冲突",
+    "保留安全诊断字段并接入主进程和工作进程日志",
+    "仅对已确认的 i2000 0x8001、TWCC=0、有待传输图像情况进行限时消息泵及结束确认等待，必须收到标准 TWRC_SUCCESS",
+    "失败或停止后关闭旧 Data Source，必要时由监督器重建 Worker",
+    "移除临时逐页启停路径，ADF 一次启用后连续逐面传输"
+  ],
+  "nativeSession": {
+    "enableCount": 1,
+    "disableCount": 1,
+    "completedTransferCount": 6,
+    "nonstandardPendingCount": 11,
+    "standardEndCount": 6,
+    "singlePageCompatCount": 0
+  },
+  "intermediateEndTransfer": {
+    "returnCode": 32769,
+    "returnCodeHex": "0x8001",
+    "conditionCode": 0,
+    "finalReturnCode": 0,
+    "pendingCountDuringBatch": 65535,
+    "pendingCountAtCompletion": 0
+  },
+  "verification": {
+    "taskId": "task-aef80ef33ee5461b9f342b45f8971d2c",
+    "status": "COMPLETED",
+    "pageCount": 6,
+    "createdAt": "2026-10-20T08:19:56.669+00:00",
+    "updatedAt": "2026-10-20T08:20:11.436+00:00",
+    "errorCode": null,
+    "settings": {
+      "feedMode": "adf_simplex",
+      "resolution": 300
+    },
+    "uniquePageIds": true,
+    "sequences": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "checks": [
+      {
+        "pageId": "page-5e199982fc4e434baab194eaff7cf743",
+        "sequence": 1,
+        "width": 2476,
+        "height": 3592,
+        "fileSize": 337441,
+        "sha256": "3647637a4d4d61ba09fd45a8e4854a2dbe1297497610383c66d32650b9d37867",
+        "sha256Matches": true,
+        "sizeMatches": true,
+        "dimensionsMatch": true,
+        "originalJpeg": true,
+        "thumbnailJpeg": true
+      },
+      {
+        "pageId": "page-ee7e99c7e2b24e8c82417252f7fbe455",
+        "sequence": 2,
+        "width": 2464,
+        "height": 3592,
+        "fileSize": 369575,
+        "sha256": "5efa37f2d78a3f9892b8c37238ebe6e654bc57ce485fc28f47931dfcf9a44ac0",
+        "sha256Matches": true,
+        "sizeMatches": true,
+        "dimensionsMatch": true,
+        "originalJpeg": true,
+        "thumbnailJpeg": true
+      },
+      {
+        "pageId": "page-6d52907086034823a87bb0509c2755e5",
+        "sequence": 3,
+        "width": 2462,
+        "height": 3598,
+        "fileSize": 503791,
+        "sha256": "8e02ac266c71a645ef7dc58c7b774d1db7cbc1137b299174b13e0b0af56fa727",
+        "sha256Matches": true,
+        "sizeMatches": true,
+        "dimensionsMatch": true,
+        "originalJpeg": true,
+        "thumbnailJpeg": true
+      },
+      {
+        "pageId": "page-30ec7d4ae9214f04a7c3f49695b493ba",
+        "sequence": 4,
+        "width": 2470,
+        "height": 3594,
+        "fileSize": 444747,
+        "sha256": "d484bd69625aa2ad297ffe9a52f1cc81289131b243ffd77476547f26e76c7d49",
+        "sha256Matches": true,
+        "sizeMatches": true,
+        "dimensionsMatch": true,
+        "originalJpeg": true,
+        "thumbnailJpeg": true
+      },
+      {
+        "pageId": "page-a4e22e7f1b7a48be8cd917d980cac55a",
+        "sequence": 5,
+        "width": 2466,
+        "height": 3592,
+        "fileSize": 382108,
+        "sha256": "529d6cabfe880ddfbc37f5bb64219c1c79486c3636abbc77f41504e633f23183",
+        "sha256Matches": true,
+        "sizeMatches": true,
+        "dimensionsMatch": true,
+        "originalJpeg": true,
+        "thumbnailJpeg": true
+      },
+      {
+        "pageId": "page-264be21ceeb0445eac1825a34bf515c6",
+        "sequence": 6,
+        "width": 2470,
+        "height": 3604,
+        "fileSize": 635187,
+        "sha256": "754c655a89a4e4cfad41f0b0fdf65e4d8442e386b30ea855bcf5be2ffe89decc",
+        "sha256Matches": true,
+        "sizeMatches": true,
+        "dimensionsMatch": true,
+        "originalJpeg": true,
+        "thumbnailJpeg": true
+      }
+    ]
+  },
+  "targetedValidation": {
+    "latestResult": "35 passed",
+    "ruff": "通过",
+    "compile": "通过",
+    "diffCheck": "通过",
+    "fullSuiteRun": false
+  },
+  "limitations": [
+    "本记录只覆盖本机 ADF 单面 300 DPI 原生批量 6 张",
+    "双面、300 张单面、150 张双面以及完整异常验收仍未完成",
+    "既有失败任务及有效原图保留，本次未执行任务或页面删除"
+  ],
+  "evidenceReuse": "删除临时兼容分支后保留相同的已验证原生调用路径，并通过针对性回归；没有为清理分支再次取纸扫描"
+}
