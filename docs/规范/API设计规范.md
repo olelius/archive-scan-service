@@ -135,3 +135,7 @@ SCAN_FAILED
 ```
 
 ADF无纸是正常完成，不使用错误码。
+
+TWAIN 失败可在 `data.diagnostics` 中返回白名单字段 `stage`、`capabilityId`、`exceptionType`、`twainConditionCode`、`twainReturnCode` 和 `pendingCount`；不返回路径、堆栈或图片内容。任务详情及失败事件保留由这些安全字段生成的具体中文说明，不再把全部扫描错误替换成相同的“扫描失败”。
+
+扫描开始请求可显式指定固定字段 `CAP_XFERCOUNT`，值为 `-1` 或 `1` 至 `32767` 的整数，用于诊断时限制本轮图像面数；ADF 默认不限面数并以无纸结束，平板仍为一面。`pageId` 全局唯一，与任务内递增 `sequence` 独立，继续补扫不改变已有 ID 和序号。

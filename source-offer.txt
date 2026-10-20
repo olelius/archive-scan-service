@@ -1,0 +1,13 @@
+档案本机扫描服务 GPLv2 源码提供说明
+
+本测试交付目录包含本项目源码（app、run.py、部署脚本和相关配置）以及运行时中 pytwain 2.3.0 的 Python 源码文件。
+
+pytwain 2.3.0 按 GNU General Public License, version 2（GPLv2）分发。本目录的对应许可证文本位于：
+
+licenses\GPL-2.0.txt
+
+第三方组件和版本索引位于：
+
+licenses\THIRD-PARTY-NOTICES.md
+
+如果交付目录中的源代码或许可证文件不完整，请不要继续对外分发；应从项目交付负责人处取得完整对应源码和许可证材料。

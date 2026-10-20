@@ -2,15 +2,24 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Generator, Mapping
+import logging
 import os
 from queue import Empty
 import time
 from typing import Any, Callable, Protocol
 
+from app.config import Settings
+from app.logging_config import configure_logging
 from app.models.schemas import CapabilitySchema
+from app.scanner.diagnostics import describe_failure, failure_message, safe_diagnostics
 from app.scanner.file_transfer import FileTransferResult
-from app.scanner.twain_backend import TwainBackend, TwainBackendError, TwainDevice
+from app.scanner.twain_backend import (
+    TwainBackend,
+    TwainBackendError,
+    TwainDevice,
+    TwainScanStopped,
+)
 from app.scanner.protocol import CommandType
 from app.worker.messages import (
     CommandMessage,
@@ -21,6 +30,9 @@ from app.worker.messages import (
     decode_message,
     encode_message,
 )
+
+
+LOGGER = logging.getLogger("archive_scan_service.worker")
 
 
 class WorkerRuntime(Protocol):
@@ -46,12 +58,14 @@ class WorkerRuntime(Protocol):
     ) -> list[CapabilitySchema]:
         """应用固定配置并重新查询 Capability，不开始扫描。"""
 
-    def scan_once(
+    def scan_pages(
         self,
         device_id: str,
         settings: Mapping[str, Any],
-    ) -> FileTransferResult:
-        """执行一次文件模式扫描并返回原图。"""
+        *,
+        should_stop: Callable[[], bool],
+    ) -> Generator[FileTransferResult, None, None]:
+        """执行一轮扫描并逐面返回原图。"""
 
     def close_source(self) -> None:
         """关闭当前打开的 TWAIN Data Source。"""
@@ -72,7 +86,9 @@ class NoopWorkerRuntime:
         *,
         show_ui: bool = False,
     ) -> dict[str, Any]:
-        raise TwainBackendError("TWAIN_SOURCE_NOT_FOUND", "测试运行时没有 TWAIN Data Source")
+        raise TwainBackendError(
+            "TWAIN_SOURCE_NOT_FOUND", "测试运行时没有 TWAIN Data Source"
+        )
 
     def query_capabilities(self) -> list[CapabilitySchema]:
         raise TwainBackendError(
@@ -80,17 +96,21 @@ class NoopWorkerRuntime:
             "测试运行时没有打开 TWAIN Data Source",
         )
 
-    def resolve_capabilities(self, settings: Mapping[str, Any]) -> list[CapabilitySchema]:
+    def resolve_capabilities(
+        self, settings: Mapping[str, Any]
+    ) -> list[CapabilitySchema]:
         raise TwainBackendError(
             "TWAIN_SOURCE_NOT_OPEN",
             "测试运行时没有打开 TWAIN Data Source",
         )
 
-    def scan_once(
+    def scan_pages(
         self,
         device_id: str,
         settings: Mapping[str, Any],
-    ) -> FileTransferResult:
+        *,
+        should_stop: Callable[[], bool],
+    ) -> Generator[FileTransferResult, None, None]:
         raise TwainBackendError(
             "TWAIN_SOURCE_NOT_OPEN",
             "测试运行时没有打开 TWAIN Data Source",
@@ -137,11 +157,13 @@ class TwainRuntime:
             raise RuntimeError("TWAIN 后端已经关闭")
         return self._backend.resolve_capabilities(settings)
 
-    def scan_once(
+    def scan_pages(
         self,
         device_id: str,
         settings: Mapping[str, Any],
-    ) -> FileTransferResult:
+        *,
+        should_stop: Callable[[], bool],
+    ) -> Generator[FileTransferResult, None, None]:
         if self._backend is None:
             raise RuntimeError("TWAIN 后端已经关闭")
         output_dir = settings.get("outputDir")
@@ -150,10 +172,11 @@ class TwainRuntime:
         page_id = settings.get("pageId", "page-1")
         if not isinstance(page_id, str) or not page_id:
             raise TwainBackendError("SCAN_FAILED", "扫描 pageId 必须是非空字符串")
-        return self._backend.scan_once(
+        return self._backend.scan_pages(
             output_dir,
             page_id=page_id,
             settings=settings,
+            should_stop=should_stop,
         )
 
     def close_source(self) -> None:
@@ -177,6 +200,7 @@ def _command_failed(
     *,
     error_code: str,
     error_message: str,
+    diagnostics: Mapping[str, Any] | None = None,
 ) -> None:
     if isinstance(command, ScanCommand):
         command_id = command.command_id
@@ -195,6 +219,7 @@ def _command_failed(
             payload={
                 "errorCode": error_code,
                 "errorMessage": error_message,
+                "diagnostics": safe_diagnostics(diagnostics),
             },
         ),
     )
@@ -217,12 +242,104 @@ def _command_succeeded(
     )
 
 
+class _ScanControl:
+    """在 TWAIN 线程内处理扫描中的停止、关闭和心跳。"""
+
+    def __init__(
+        self,
+        command_queue: Any,
+        event_queue: Any,
+        scan: ScanCommand,
+        *,
+        heartbeat_interval: float,
+    ) -> None:
+        self._commands = command_queue
+        self._events = event_queue
+        self._scan = scan
+        self._heartbeat_interval = heartbeat_interval
+        self._next_heartbeat = time.monotonic() + heartbeat_interval
+        self.stopped = False
+        self.shutdown_command: CommandMessage | None = None
+
+    def poll(self) -> bool:
+        if time.monotonic() >= self._next_heartbeat:
+            _emit(
+                self._events,
+                EventMessage(
+                    event_type="worker_heartbeat",
+                    payload={"pid": os.getpid()},
+                ),
+            )
+            self._next_heartbeat = time.monotonic() + self._heartbeat_interval
+        while not self.stopped:
+            try:
+                raw = self._commands.get_nowait()
+            except Empty:
+                break
+            try:
+                command = decode_message(raw)
+            except MessageError:
+                continue
+            if not isinstance(command, (CommandMessage, ScanCommand)):
+                continue
+            if isinstance(command, CommandMessage):
+                if command.message_type == CommandType.SHUTDOWN.value:
+                    self.shutdown_command = command
+                    self.stopped = True
+                    break
+                if command.message_type == CommandType.STOP_SCAN.value:
+                    if command.task_id == self._scan.task_id:
+                        self.stopped = True
+                        break
+                    _command_failed(
+                        self._events,
+                        command,
+                        error_code="TASK_STATE_INVALID",
+                        error_message="停止请求与活动任务不匹配",
+                    )
+                    continue
+            _command_failed(
+                self._events,
+                command,
+                error_code="SCANNER_BUSY",
+                error_message="工作进程正在扫描",
+            )
+        return self.stopped
+
+    def finish(self) -> bool:
+        """TWAIN 清理完成后才确认关闭命令。"""
+
+        if self.shutdown_command is None:
+            return False
+        _command_succeeded(self._events, self.shutdown_command)
+        return True
+
+
+def _close_failed_source(runtime: WorkerRuntime) -> bool:
+    """失败后不复用旧 Data Source；关闭失败时退出以重建 Worker。"""
+
+    close = getattr(runtime, "close_source", None)
+    if close is None:
+        return False
+    try:
+        close()
+        LOGGER.info("任务数据源已关闭，下次请求重新打开")
+        return False
+    except Exception as exc:
+        LOGGER.error(
+            "失败后数据源关闭失败，重建工作进程：%s",
+            describe_failure(exc, "close_source"),
+        )
+        return True
+
+
 def _handle_command(
     command: Message,
     event_queue: Any,
     *,
     active_scan: ScanCommand | None,
     runtime: WorkerRuntime,
+    scan_control: _ScanControl | None = None,
 ) -> tuple[ScanCommand | None, bool]:
     """处理一条命令，返回新的扫描状态和是否退出。"""
 
@@ -247,8 +364,53 @@ def _handle_command(
         # 没有输出目录的生命周期命令只验证“扫描中”状态，不能启动文件传输。
         if not isinstance(command.settings.get("outputDir"), str):
             return command, False
+        page_count = 0
+        result: FileTransferResult | None = None
         try:
-            result = runtime.scan_once(command.device_id, command.settings)
+            pages = runtime.scan_pages(
+                command.device_id,
+                command.settings,
+                should_stop=scan_control.poll if scan_control else lambda: False,
+            )
+            try:
+                for result in pages:
+                    page_count += 1
+                    page_payload: dict[str, Any] = {
+                        "pageId": result.original_path.stem,
+                        "path": str(result.original_path),
+                        "size": result.size,
+                        "transferReturnCode": result.transfer_return_code,
+                        "pendingCount": result.pending_count,
+                    }
+                    if result.configuration_results:
+                        page_payload["configurationResults"] = [
+                            dict(item) for item in result.configuration_results
+                        ]
+                    _emit(
+                        event_queue,
+                        EventMessage(
+                            event_type="page_file_ready",
+                            command_id=command.command_id,
+                            task_id=command.task_id,
+                            payload=page_payload,
+                        ),
+                    )
+            finally:
+                pages.close()
+            if scan_control and scan_control.poll():
+                raise TwainScanStopped()
+        except TwainScanStopped:
+            _emit(
+                event_queue,
+                EventMessage(
+                    event_type="scan_stopped",
+                    command_id=command.command_id,
+                    task_id=command.task_id,
+                    payload={"pageCount": page_count},
+                ),
+            )
+            restart = _close_failed_source(runtime)
+            return None, (scan_control.finish() if scan_control else False) or restart
         except TwainBackendError as exc:
             _emit(
                 event_queue,
@@ -259,11 +421,15 @@ def _handle_command(
                     payload={
                         "errorCode": exc.error_code,
                         "errorMessage": str(exc),
+                        "diagnostics": exc.diagnostics,
                     },
                 ),
             )
-            return None, False
-        except Exception:
+            restart = _close_failed_source(runtime)
+            return None, (scan_control.finish() if scan_control else False) or restart
+        except Exception as exc:
+            detail = describe_failure(exc, "scan")
+            LOGGER.error("工作进程扫描失败：诊断=%s", detail)
             _emit(
                 event_queue,
                 EventMessage(
@@ -272,37 +438,24 @@ def _handle_command(
                     task_id=command.task_id,
                     payload={
                         "errorCode": "SCAN_FAILED",
-                        "errorMessage": "TWAIN扫描失败",
+                        "errorMessage": failure_message("SCAN_FAILED", detail),
+                        "diagnostics": detail,
                     },
                 ),
             )
-            return None, False
+            restart = _close_failed_source(runtime)
+            return None, (scan_control.finish() if scan_control else False) or restart
 
-        configuration_results = [dict(item) for item in result.configuration_results]
-        page_payload: dict[str, Any] = {
-            "path": str(result.original_path),
-            "size": result.size,
-            "transferReturnCode": result.transfer_return_code,
-            "pendingCount": result.pending_count,
-        }
-        if configuration_results:
-            page_payload["configurationResults"] = configuration_results
-        _emit(
-            event_queue,
-            EventMessage(
-                event_type="page_file_ready",
-                command_id=command.command_id,
-                task_id=command.task_id,
-                payload=page_payload,
-            ),
-        )
         completion_payload: dict[str, Any] = {
-            "pageCount": 1,
-            "pendingCount": result.pending_count,
-            "transferReturnCode": result.transfer_return_code,
+            "pageCount": page_count,
+            "pendingCount": 0,
         }
-        if configuration_results:
-            completion_payload["configurationResults"] = configuration_results
+        if result is not None:
+            completion_payload["transferReturnCode"] = result.transfer_return_code
+            if result.configuration_results:
+                completion_payload["configurationResults"] = [
+                    dict(item) for item in result.configuration_results
+                ]
         _emit(
             event_queue,
             EventMessage(
@@ -331,8 +484,9 @@ def _handle_command(
                 command,
                 error_code=exc.error_code,
                 error_message=str(exc),
+                diagnostics=exc.diagnostics,
             )
-            return active_scan, False
+            return active_scan, _close_failed_source(runtime)
         except Exception:
             _command_failed(
                 event_queue,
@@ -433,7 +587,9 @@ def _handle_command(
                         command_id=command.command_id,
                         payload={
                             "count": len(capabilities),
-                            "capabilities": [item.to_payload() for item in capabilities],
+                            "capabilities": [
+                                item.to_payload() for item in capabilities
+                            ],
                         },
                     ),
                 )
@@ -453,8 +609,9 @@ def _handle_command(
                 command,
                 error_code=exc.error_code,
                 error_message=str(exc),
+                diagnostics=exc.diagnostics,
             )
-            return active_scan, False
+            return active_scan, _close_failed_source(runtime)
         except Exception:
             _command_failed(
                 event_queue,
@@ -556,6 +713,14 @@ class WorkerProcess:
                     self._event_queue,
                     active_scan=active_scan,
                     runtime=runtime,
+                    scan_control=_ScanControl(
+                        self._command_queue,
+                        self._event_queue,
+                        command,
+                        heartbeat_interval=self._heartbeat_interval,
+                    )
+                    if isinstance(command, ScanCommand)
+                    else None,
                 )
                 next_heartbeat = time.monotonic() + self._heartbeat_interval
                 if should_exit:
@@ -572,6 +737,7 @@ def worker_process_entry(
 ) -> None:
     """multiprocessing.spawn 使用的顶层子进程入口。"""
 
+    configure_logging(Settings())
     WorkerProcess(
         command_queue,
         event_queue,

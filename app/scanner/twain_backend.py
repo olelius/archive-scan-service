@@ -5,19 +5,23 @@ from __future__ import annotations
 import ctypes
 import hashlib
 import json
+import logging
 import os
-from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field
+from collections.abc import Callable, Generator, Mapping, Sequence
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 import struct
 import sys
+import time
 from typing import Any, Protocol
+from uuid import uuid4
 
 from app.scanner.capability_codec import (
     CAP_AUTOFEED,
     CAP_AUTOSCAN,
     CAP_DUPLEXENABLED,
     CAP_FEEDERENABLED,
+    CAP_FEEDERLOADED,
     CAP_INDICATORS,
     CAP_XFERCOUNT,
     CapabilityMessage,
@@ -41,6 +45,7 @@ from app.scanner.capability_codec import (
     TWSX_FILE,
 )
 from app.scanner.capability_service import CapabilityService
+from app.scanner.diagnostics import describe_failure, failure_message, safe_diagnostics
 from app.scanner.file_transfer import (
     FileTransfer,
     FileTransferError,
@@ -49,12 +54,29 @@ from app.scanner.file_transfer import (
 )
 
 
+LOGGER = logging.getLogger("archive_scan_service.worker")
+
+
 class TwainBackendError(RuntimeError):
     """TWAIN 后端对上层暴露的稳定错误。"""
 
-    def __init__(self, error_code: str, message: str) -> None:
+    def __init__(
+        self,
+        error_code: str,
+        message: str,
+        *,
+        diagnostics: Mapping[str, Any] | None = None,
+    ) -> None:
         super().__init__(message)
         self.error_code = error_code
+        self.diagnostics = safe_diagnostics(diagnostics)
+
+
+class TwainScanStopped(TwainBackendError):
+    """扫描在安全传输边界收到停止请求。"""
+
+    def __init__(self) -> None:
+        super().__init__("SCAN_STOPPED", "扫描已停止")
 
 
 class TwainCapabilityFormatError(ValueError):
@@ -319,7 +341,9 @@ class PytwainCapabilitySource:
             container_type = int(capability.ConType)
             structs = self._twain.structs
             if container_type == constants.TWON_ONEVALUE:
-                item_type = int(ctypes.cast(pointer, ctypes.POINTER(ctypes.c_uint16))[0])
+                item_type = int(
+                    ctypes.cast(pointer, ctypes.POINTER(ctypes.c_uint16))[0]
+                )
                 ctype = self._item_ctype(item_type, container_type=TW_ONEVALUE)
                 value = ctypes.cast(pointer + 2, ctypes.POINTER(ctype))[0]
                 return RawCapability(
@@ -403,6 +427,8 @@ class PytwainCapabilitySource:
         """关闭底层 pytwain Data Source。"""
 
         self._source.close()
+        if getattr(self._source, "_state", "closed") != "closed":
+            raise TwainBackendError("SCAN_FAILED", "TWAIN 数据源未能正常关闭")
 
     def _item_ctype(self, item_type: int, *, container_type: str) -> Any:
         ctype = getattr(self._twain, "_mapping", {}).get(item_type)
@@ -473,11 +499,13 @@ class _TW_EXTIMAGEINFO(ctypes.Structure):
 class PytwainFileTransferSource:
     """把 pytwain Source 暴露为一次无界面文件传输所需的接口。"""
 
+    END_TRANSFER_TIMEOUT = 8.0
+
     def __init__(self, source: Any, manager: Any, twain_module: Any) -> None:
         self._source = source
         self._manager = manager
         self._twain = twain_module
-        self._prepared = False
+        self._stop_requested: Callable[[], bool] | None = None
 
     @property
     def transfer_ready_message(self) -> int:
@@ -488,37 +516,21 @@ class PytwainFileTransferSource:
         return int(self._twain.constants.MSG_CLOSEDSREQ)
 
     def prepare_file_transfer(self) -> None:
-        """准备一次文件传输，并执行必要的内部单页采集控制。"""
+        """文件传输不再覆盖本轮已设置的采集页数。"""
 
-        if self._prepared:
-            return
-        constants = self._twain.constants
-
-        # 某些目标 Data Source 需要这两个内部的单页采集控制才能发出
-        # MSG_XFERREADY；它们不是前端固定业务字段，也不参与 Capability 映射。
-        if hasattr(self._source, "get_capability_current"):
-            for capability_id, item_type, value in (
-                (0x8032, constants.TWTY_BOOL, True),
-                (0x8031, constants.TWTY_INT16, 1),
-            ):
-                try:
-                    self._source.set_capability(capability_id, item_type, value)
-                except Exception:
-                    pass
-            try:
-                self._source.get_capability_current(constants.CAP_INDICATORS)
-            except Exception:
-                pass
-        self._prepared = True
+        return None
 
     def start_acquisition(self) -> None:
         """以隐藏、非模态厂商界面启动采集。"""
 
         self._source.request_acquire(show_ui=False, modal_ui=False)
 
-    def wait_for_event(self) -> int:
+    def wait_for_event(self, *, should_stop: Callable[[], bool] | None = None) -> int:
         """运行 pytwain 消息循环并返回最后一个 TWAIN 事件。"""
 
+        if should_stop is not None:
+            self._stop_requested = should_stop
+            return self._wait_interruptibly(should_stop)
         events: list[int] = []
 
         def callback(event: int) -> None:
@@ -535,6 +547,50 @@ class PytwainFileTransferSource:
                 "TWAIN消息循环未返回扫描事件",
             )
         return events[-1]
+
+    def _wait_interruptibly(self, should_stop: Callable[[], bool]) -> int:
+        """在 TWAIN 所属线程泵送消息，同时轮询停止命令。"""
+
+        user32 = ctypes.WinDLL("user32", use_last_error=True)
+        message = self._twain.structs.MSG()
+        peek = user32.PeekMessageW
+        peek.argtypes = [
+            ctypes.POINTER(type(message)),
+            ctypes.c_void_p,
+            ctypes.c_uint,
+            ctypes.c_uint,
+            ctypes.c_uint,
+        ]
+        peek.restype = ctypes.c_int
+        wait = user32.MsgWaitForMultipleObjectsEx
+        wait.argtypes = [
+            ctypes.c_uint,
+            ctypes.c_void_p,
+            ctypes.c_uint,
+            ctypes.c_uint,
+            ctypes.c_uint,
+        ]
+        wait.restype = ctypes.c_uint
+        translate = user32.TranslateMessage
+        translate.argtypes = [ctypes.POINTER(type(message))]
+        dispatch = user32.DispatchMessageW
+        dispatch.argtypes = [ctypes.POINTER(type(message))]
+        dispatch.restype = ctypes.c_ssize_t
+        while True:
+            if should_stop():
+                raise TwainScanStopped()
+            if not peek(ctypes.byref(message), None, 0, 0, 1):
+                if wait(0, None, 50, 0x04FF, 0x0004) == 0xFFFFFFFF:
+                    raise ctypes.WinError(ctypes.get_last_error())
+                continue
+            if message.message == 0x0012:
+                raise TwainBackendError("SCANNER_OFFLINE", "TWAIN 消息窗口已退出")
+            return_code, event = self._source._process_event(message)
+            if event in {self.transfer_ready_message, self.close_request_message}:
+                return int(event)
+            if return_code == self._twain.constants.TWRC_NOTDSEVENT:
+                translate(ctypes.byref(message))
+                dispatch(ctypes.byref(message))
 
     def read_image_info(self) -> Any:
         """读取当前页面的标准图像信息。"""
@@ -561,13 +617,130 @@ class PytwainFileTransferSource:
     def transfer_file(self, path: Path, *, file_format: int) -> TransferStatus:
         """执行 `DAT_SETUPFILEXFER`、`DAT_IMAGEFILEXFER` 和 `MSG_ENDXFER`。"""
 
-        self._source.file_xfer_params = (str(path), int(file_format))
-        return_code = int(self._source._get_file_image())
-        pending_count = int(self._source._end_xfer())
+        stage = "setup_file_transfer"
+        try:
+            LOGGER.info("文件传输阶段：%s", stage)
+            self._source.file_xfer_params = (str(path), int(file_format))
+            stage = "image_file_transfer"
+            LOGGER.info("文件传输阶段：%s", stage)
+            return_code = int(self._source._get_file_image())
+            LOGGER.info("图像传输返回：TWRC=%s", return_code)
+            stage = "end_transfer"
+            LOGGER.info("文件传输阶段：%s", stage)
+            pending_count = self._end_file_transfer()
+        except Exception as exc:
+            detail = describe_failure(exc, stage)
+            LOGGER.error("文件传输调用失败：诊断=%s", detail)
+            raise TwainBackendError(
+                "SCAN_FAILED",
+                failure_message("SCAN_FAILED", detail),
+                diagnostics=detail,
+            ) from exc
         return TransferStatus(
             return_code=return_code,
             pending_count=pending_count,
         )
+
+    def _end_file_transfer(self) -> int:
+        """结束传输必须收到标准成功，特定待处理返回仅允许限时等待。"""
+
+        constants = self._twain.constants
+        deadline = time.monotonic() + self.END_TRANSFER_TIMEOUT
+        while True:
+            if self._stop_requested is not None and self._stop_requested():
+                raise TwainScanStopped()
+            pending = self._twain.structs.TW_PENDINGXFERS()
+            return_code = int(
+                self._source._call(
+                    constants.DG_CONTROL,
+                    constants.DAT_PENDINGXFERS,
+                    constants.MSG_ENDXFER,
+                    ctypes.byref(pending),
+                    (0x8001,),
+                )
+            )
+            count = int(pending.Count)
+            LOGGER.info(
+                "ENDXFER 返回：TWRC=%s，待传输数=%s，EOJ=%s",
+                return_code,
+                count,
+                int(pending.EOJ),
+            )
+            if return_code == constants.TWRC_SUCCESS:
+                if count == 0:
+                    self._source._state = "enabled"
+                return count
+            detail = {
+                "stage": "end_transfer",
+                "twainReturnCode": return_code,
+                "pendingCount": count,
+            }
+            status = self._twain.structs.TW_STATUS()
+            try:
+                self._source._call(
+                    constants.DG_CONTROL,
+                    constants.DAT_STATUS,
+                    constants.MSG_GET,
+                    ctypes.byref(status),
+                )
+                detail["twainConditionCode"] = int(status.ConditionCode)
+            except Exception as exc:
+                LOGGER.error(
+                    "读取 ENDXFER 后状态失败：%s", describe_failure(exc, "end_transfer")
+                )
+            identity = getattr(self._source, "identity", {})
+            can_wait = (
+                return_code == 0x8001
+                and count > 0
+                and detail.get("twainConditionCode") == constants.TWCC_SUCCESS
+                and "kodak" in str(identity.get("Manufacturer", "")).lower()
+                and identity.get("ProductName") == "KODAK Scanner: i2000"
+            )
+            if not can_wait or time.monotonic() >= deadline:
+                LOGGER.error("ENDXFER 未返回标准成功：诊断=%s", detail)
+                raise TwainBackendError(
+                    "SCAN_FAILED",
+                    failure_message("SCAN_FAILED", detail),
+                    diagnostics=detail,
+                )
+            self._pump_pending_events()
+            time.sleep(0.1)
+
+    def _pump_pending_events(self) -> bool:
+        """结束传输等待期间继续泵送消息，不重新启用采集。"""
+
+        user32 = ctypes.WinDLL("user32", use_last_error=True)
+        message = self._twain.structs.MSG()
+        pointer_type = ctypes.POINTER(type(message))
+        peek = user32.PeekMessageW
+        peek.argtypes = [
+            pointer_type,
+            ctypes.c_void_p,
+            ctypes.c_uint,
+            ctypes.c_uint,
+            ctypes.c_uint,
+        ]
+        peek.restype = ctypes.c_int
+        translate = user32.TranslateMessage
+        translate.argtypes = [pointer_type]
+        dispatch = user32.DispatchMessageW
+        dispatch.argtypes = [pointer_type]
+        dispatch.restype = ctypes.c_ssize_t
+        ready = False
+        for _ in range(64):
+            if not peek(ctypes.byref(message), None, 0, 0, 1):
+                break
+            if message.message == 0x0012:
+                raise TwainBackendError("SCANNER_OFFLINE", "TWAIN 消息窗口退出")
+            result, event = self._source._process_event(message)
+            if event == self.close_request_message:
+                raise TwainBackendError("SCANNER_OFFLINE", "驱动请求关闭采集")
+            if event == self.transfer_ready_message:
+                ready = True
+            if result == self._twain.constants.TWRC_NOTDSEVENT:
+                translate(ctypes.byref(message))
+                dispatch(ctypes.byref(message))
+        return ready
 
     def finish_acquisition(self) -> None:
         """关闭当前采集状态，不弹出厂商界面。"""
@@ -766,7 +939,9 @@ class TwainBackend:
         dsm_path: str | Path | None = None,
         parent_window: int | None = None,
     ) -> None:
-        if dsm_factory is not None and (dsm_path is not None or parent_window is not None):
+        if dsm_factory is not None and (
+            dsm_path is not None or parent_window is not None
+        ):
             raise ValueError("dsm_factory 不能与 dsm_path 或 parent_window 同时指定")
         self._dsm_factory = dsm_factory or (
             lambda: PytwainDsmAdapter(
@@ -888,9 +1063,7 @@ class TwainBackend:
             )
 
         configuration_results = (
-            self._apply_fixed_settings(settings)
-            if settings is not None
-            else ()
+            self._apply_fixed_settings(settings) if settings is not None else ()
         )
         transfer_ready = False
 
@@ -949,9 +1122,212 @@ class TwainBackend:
             except Exception:
                 pass
 
+    def scan_pages(
+        self,
+        output_dir: str | Path,
+        *,
+        page_id: str = "page-1",
+        settings: Mapping[str, Any] | None = None,
+        should_stop: Callable[[], bool] | None = None,
+    ) -> Generator[FileTransferResult, None, None]:
+        """一次启用 ADF，按待传输数量逐面输出，直到无纸或停止。"""
+
+        handle = self._source_handle
+        source = handle.transfer_source if handle is not None else None
+        if source is None:
+            raise TwainBackendError(
+                "TWAIN_SOURCE_NOT_OPEN", "扫描前必须先打开 Data Source"
+            )
+        FileTransfer._validate_page_id(page_id)
+        stop = should_stop or (lambda: False)
+        if stop():
+            raise TwainScanStopped()
+        configuration = dict(settings or {})
+        LOGGER.info("扫描阶段：query_capabilities")
+        self.query_capabilities()
+        requested = dict(
+            self._fixed_capability_requests(
+                {
+                    key: value
+                    for key, value in configuration.items()
+                    if key not in {"outputDir", "pageId"}
+                }
+            )
+        )
+        snapshot = (
+            {item.capability_id: item for item in self._capability_service.snapshot()}
+            if self._capability_service is not None
+            else {}
+        )
+        feeder = snapshot.get(CAP_FEEDERENABLED)
+        adf = requested.get(
+            CAP_FEEDERENABLED,
+            feeder.current_value
+            if feeder and isinstance(feeder.current_value, bool)
+            else True,
+        )
+        transfer_count = requested.get(CAP_XFERCOUNT, -1) if adf else 1
+        if (
+            isinstance(transfer_count, bool)
+            or not isinstance(transfer_count, int)
+            or (transfer_count != -1 and not 1 <= transfer_count <= 32767)
+        ):
+            raise TwainBackendError(
+                "TWAIN_CAPABILITY_SET_FAILED",
+                "传输页数必须是 -1 或 1 至 32767 的整数",
+                diagnostics={"stage": "set_capability", "capabilityId": CAP_XFERCOUNT},
+            )
+        results = self._apply_fixed_settings(
+            configuration, transfer_count=transfer_count
+        )
+        if stop():
+            raise TwainScanStopped()
+        loaded = snapshot.get(CAP_FEEDERLOADED)
+        if (
+            adf
+            and loaded
+            and loaded.query_error is None
+            and loaded.current_value is False
+        ):
+            return
+        acquiring = False
+        pending = False
+        failed = False
+        stage = "prepare_transfer"
+        transferred = 0
+
+        def start_session() -> None:
+            nonlocal acquiring, pending, stage
+            if stop():
+                raise TwainScanStopped()
+            stage = "prepare_transfer"
+            source.prepare_file_transfer()
+            acquiring = True
+            stage = "enable_source"
+            LOGGER.info("扫描阶段：%s", stage)
+            source.start_acquisition()
+            stage = "wait_event"
+            LOGGER.info("扫描阶段：%s", stage)
+            event = source.wait_for_event(should_stop=stop)
+            LOGGER.info("收到 TWAIN 事件：%s", event)
+            if event == source.close_request_message:
+                raise TwainBackendError(
+                    "SCANNER_OFFLINE", "TWAIN Data Source 关闭了扫描请求"
+                )
+            if event != source.transfer_ready_message:
+                raise TwainBackendError("SCAN_FAILED", "收到未知 TWAIN 扫描事件")
+            pending = True
+
+        try:
+            start_session()
+            transfer = FileTransfer(output_dir)
+            while True:
+                if stop():
+                    raise TwainScanStopped()
+                stage = "read_extended_info"
+                LOGGER.info("扫描阶段：%s", stage)
+                source.read_extended_image_info()
+                stage = "read_image_info"
+                LOGGER.info("扫描阶段：%s", stage)
+                source.read_image_info()
+                stage = "transfer_file"
+                LOGGER.info("扫描阶段：%s", stage)
+                page = transfer.transfer_one(source, page_id=page_id)
+                transferred += 1
+                pending = page.pending_count != 0
+                LOGGER.info(
+                    "图像传输完成：本轮页数=%s，待传输数=%s",
+                    transferred,
+                    page.pending_count,
+                )
+                yield replace(
+                    page,
+                    configuration_results=tuple(item.to_payload() for item in results),
+                )
+                if not adf or (transfer_count > 0 and transferred >= transfer_count):
+                    return
+                if not pending:
+                    return
+                page_id = f"page-{uuid4().hex}"
+        except TwainBackendError as exc:
+            failed = True
+            if not exc.diagnostics:
+                exc.diagnostics = describe_failure(exc, stage)
+            LOGGER.error(
+                "扫描失败：错误码=%s，诊断=%s", exc.error_code, exc.diagnostics
+            )
+            raise
+        except Exception as exc:
+            cause: BaseException | None = exc
+            while cause is not None:
+                if isinstance(cause, TwainScanStopped):
+                    failed = True
+                    raise cause
+                cause = cause.__cause__
+            error_code = self._scan_error_code(exc)
+            if adf and error_code == "ADF_EMPTY":
+                return
+            if error_code == "ADF_EMPTY":
+                error_code = "SCAN_FAILED"
+            failed = True
+            detail = describe_failure(exc, stage)
+            LOGGER.error("扫描失败：错误码=%s，诊断=%s", error_code, detail)
+            raise TwainBackendError(
+                error_code, failure_message(error_code, detail), diagnostics=detail
+            ) from exc
+        finally:
+            cleanup_failure: TwainBackendError | None = None
+            for needed, cleanup_stage, cleanup in (
+                (pending, "reset_transfers", source.abort_transfer),
+                (acquiring, "disable_source", source.finish_acquisition),
+            ):
+                if not needed:
+                    continue
+                LOGGER.info("扫描清理：%s", cleanup_stage)
+                try:
+                    cleanup()
+                except Exception as exc:
+                    detail = describe_failure(exc, cleanup_stage)
+                    LOGGER.error("扫描清理失败：诊断=%s", detail)
+                    if not failed and cleanup_failure is None:
+                        cleanup_failure = TwainBackendError(
+                            "SCAN_FAILED",
+                            failure_message("SCAN_FAILED", detail),
+                            diagnostics=detail,
+                        )
+            if cleanup_failure is not None:
+                raise cleanup_failure
+
+    @staticmethod
+    def _scan_error_code(error: BaseException) -> str:
+        """保留被文件传输层包装的真实设备错误类别。"""
+
+        import twain
+
+        while True:
+            if isinstance(error, twain.exceptions.PaperJam):
+                return "PAPER_JAM"
+            if isinstance(
+                error,
+                (
+                    twain.exceptions.CheckDeviceOnlineError,
+                    twain.exceptions.NoDataSourceError,
+                ),
+            ):
+                return "SCANNER_OFFLINE"
+            if isinstance(error, twain.exceptions.UnknownError) and str(error) == (
+                f"ConditionCode = {twain.constants.TWCC_NOMEDIA}"
+            ):
+                return "ADF_EMPTY"
+            if error.__cause__ is None:
+                return "SCAN_FAILED"
+            error = error.__cause__
+
     def _apply_fixed_settings(
         self,
         settings: Mapping[str, Any],
+        *,
+        transfer_count: int = 1,
     ) -> tuple[Any, ...]:
         """按当前 Capability 快照设置显式传入的固定业务字段。"""
 
@@ -975,7 +1351,7 @@ class TwainBackend:
 
         requests = self._fixed_capability_requests(capability_settings)
         requests_by_id: dict[int, Any] = {
-            CAP_XFERCOUNT: 1,
+            CAP_XFERCOUNT: transfer_count,
             CAP_AUTOSCAN: True,
             CAP_INDICATORS: False,
             ICAP_XFERMECH: TWSX_FILE,
@@ -984,15 +1360,41 @@ class TwainBackend:
         for capability_id, value in requests:
             if capability_id not in requests_by_id:
                 requests_by_id[capability_id] = value
+        handle = self._source_handle
+        if (
+            handle is not None
+            and "kodak" in handle.identity.manufacturer.lower()
+            and (handle.identity.product_name == "KODAK Scanner: i2000")
+        ):
+            supported = {item.capability_id for item in service.snapshot()}
+            duplex = dict(requests).get(CAP_DUPLEXENABLED, False)
+            page_count = (
+                0
+                if transfer_count == -1
+                else ((transfer_count + 1) // 2 if duplex else transfer_count)
+            )
+            # i2000 私有控制，连续模式的真机语义仍需根据实际传输验证。
+            for capability_id, value in (
+                (0x8032, True),
+                (0x8031, page_count),
+            ):
+                if capability_id in supported:
+                    requests_by_id[capability_id] = value
         results = []
         try:
             for capability_id, value in requests_by_id.items():
+                LOGGER.info("设置扫描参数：Capability=0x%04X", capability_id)
                 results.append(service.set_capability(capability_id, value))
+                LOGGER.info("扫描参数设置完成：Capability=0x%04X", capability_id)
         except Exception as exc:
             if isinstance(exc, TwainBackendError):
                 raise
             error_code = getattr(exc, "error_code", "TWAIN_CAPABILITY_SET_FAILED")
-            raise TwainBackendError(error_code, str(exc)) from exc
+            detail = describe_failure(exc, "set_capability", capability_id)
+            LOGGER.error("扫描参数设置失败：错误码=%s，诊断=%s", error_code, detail)
+            raise TwainBackendError(
+                error_code, failure_message(error_code, detail), diagnostics=detail
+            ) from exc
         return tuple(results)
 
     @staticmethod
@@ -1035,9 +1437,7 @@ class TwainBackend:
             if key == "feedMode":
                 mode = str(value).lower()
                 if mode in {"flatbed", "flat", "平板"}:
-                    requests.extend(
-                        [(constants["CAP_FEEDERENABLED"], False)]
-                    )
+                    requests.extend([(constants["CAP_FEEDERENABLED"], False)])
                 elif mode in {"adf_simplex", "adfsimplex", "simplex", "adf单面"}:
                     requests.extend(
                         [

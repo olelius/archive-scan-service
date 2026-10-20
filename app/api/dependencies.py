@@ -23,6 +23,7 @@ from app.repositories.database import Database
 from app.repositories.page_repository import PageRepository
 from app.repositories.task_repository import TaskRepository
 from app.scanner.pnp_status import DeviceStatusResolver, WindowsPnpStatusResolver
+from app.scanner.diagnostics import failure_message, safe_diagnostics
 from app.scanner.protocol import CommandType
 from app.services.event_hub import EventHub
 from app.services.page_service import PageRegistrationError, PageService
@@ -48,8 +49,15 @@ LOGGER = logging.getLogger("archive_scan_service")
 class WorkerGatewayError(RuntimeError):
     """Worker 网关对 API 层暴露的稳定错误。"""
 
-    def __init__(self, error_code: str, message: str) -> None:
+    def __init__(
+        self,
+        error_code: str,
+        message: str,
+        *,
+        diagnostics: Mapping[str, Any] | None = None,
+    ) -> None:
         self.error_code = error_code
+        self.diagnostics = safe_diagnostics(diagnostics)
         super().__init__(message)
 
 
@@ -139,7 +147,9 @@ class WorkerGateway:
             ready = self._supervisor.wait_until_ready(timeout=10.0)
         except Exception as exc:
             self.shutdown()
-            raise WorkerGatewayError("WORKER_UNAVAILABLE", "扫描工作进程启动失败") from exc
+            raise WorkerGatewayError(
+                "WORKER_UNAVAILABLE", "扫描工作进程启动失败"
+            ) from exc
         with self._condition:
             self._worker_ready = True
             self._worker_pid = ready.pid
@@ -178,7 +188,9 @@ class WorkerGateway:
     def enumerate_devices(self) -> list[Mapping[str, Any]]:
         command_id = self._new_command_id()
         events = self._send_and_wait(
-            CommandMessage(command_id=command_id, message_type=CommandType.ENUMERATE_DEVICES.value)
+            CommandMessage(
+                command_id=command_id, message_type=CommandType.ENUMERATE_DEVICES.value
+            )
         )
         devices = [
             dict(event.payload)
@@ -194,7 +206,10 @@ class WorkerGateway:
         self._events.publish(
             {
                 "event": "device_list_changed",
-                "data": {"devices": list(self._devices.values()), "total": len(self._devices)},
+                "data": {
+                    "devices": list(self._devices.values()),
+                    "total": len(self._devices),
+                },
             }
         )
         return list(self._devices.values())
@@ -261,7 +276,11 @@ class WorkerGateway:
             with self._condition:
                 self._scan_metadata.pop(command_id, None)
             message = str(exc)
-            code = "SCANNER_BUSY" if "扫描" in message or "活动" in message else "WORKER_UNAVAILABLE"
+            code = (
+                "SCANNER_BUSY"
+                if "扫描" in message or "活动" in message
+                else "WORKER_UNAVAILABLE"
+            )
             raise WorkerGatewayError(code, message) from exc
 
     def stop_scan(self, task_id: str) -> None:
@@ -273,7 +292,9 @@ class WorkerGateway:
         try:
             self._supervisor.send(command)
         except WorkerSupervisorError as exc:
-            raise WorkerGatewayError("WORKER_UNAVAILABLE", "扫描工作进程不可用") from exc
+            raise WorkerGatewayError(
+                "WORKER_UNAVAILABLE", "扫描工作进程不可用"
+            ) from exc
 
     def _ensure_source(self, device_id: str) -> None:
         with self._condition:
@@ -283,7 +304,9 @@ class WorkerGateway:
             with self._condition:
                 device = self._devices.get(device_id)
         if device is None:
-            raise WorkerGatewayError("TWAIN_SOURCE_NOT_FOUND", "TWAIN 设备不存在或当前不可用")
+            raise WorkerGatewayError(
+                "TWAIN_SOURCE_NOT_FOUND", "TWAIN 设备不存在或当前不可用"
+            )
         with self._condition:
             if self._open_device_id == device_id:
                 return
@@ -305,7 +328,9 @@ class WorkerGateway:
         with self._condition:
             self._open_device_id = device_id
 
-    def _send_and_wait(self, command: CommandMessage, *, timeout: float = 30.0) -> list[EventMessage]:
+    def _send_and_wait(
+        self, command: CommandMessage, *, timeout: float = 30.0
+    ) -> list[EventMessage]:
         waiter = _CommandWaiter()
         with self._condition:
             self._waiters[command.command_id] = waiter
@@ -314,7 +339,9 @@ class WorkerGateway:
         except WorkerSupervisorError as exc:
             with self._condition:
                 self._waiters.pop(command.command_id, None)
-            raise WorkerGatewayError("WORKER_UNAVAILABLE", "扫描工作进程不可用") from exc
+            raise WorkerGatewayError(
+                "WORKER_UNAVAILABLE", "扫描工作进程不可用"
+            ) from exc
         if not waiter.done.wait(timeout=timeout):
             with self._condition:
                 self._waiters.pop(command.command_id, None)
@@ -322,13 +349,20 @@ class WorkerGateway:
         with self._condition:
             self._waiters.pop(command.command_id, None)
             events = list(waiter.events)
-        failed = next((item for item in events if item.event_type == "command_failed"), None)
+        failed = next(
+            (item for item in events if item.event_type == "command_failed"), None
+        )
         if failed is not None:
             error_code = failed.payload.get("errorCode")
             error_message = failed.payload.get("errorMessage")
+            with self._condition:
+                self._open_device_id = None
             raise WorkerGatewayError(
                 error_code if isinstance(error_code, str) else "WORKER_UNAVAILABLE",
-                error_message if isinstance(error_message, str) else "扫描工作进程命令失败",
+                error_message
+                if isinstance(error_message, str)
+                else "扫描工作进程命令失败",
+                diagnostics=failed.payload.get("diagnostics"),
             )
         return events
 
@@ -366,9 +400,13 @@ class WorkerGateway:
             with self._condition:
                 self._worker_ready = False
                 self._worker_pid = None
+                self._open_device_id = None
             if event.task_id:
                 task = self._tasks.get(event.task_id)
-                if task is not None and task.status in {TaskStatus.SCANNING, TaskStatus.STOPPING}:
+                if task is not None and task.status in {
+                    TaskStatus.SCANNING,
+                    TaskStatus.STOPPING,
+                }:
                     try:
                         failed = self._tasks.fail_scan(
                             event.task_id,
@@ -428,6 +466,9 @@ class WorkerGateway:
             )
 
     def _handle_scan_stopped(self, event: EventMessage) -> None:
+        with self._condition:
+            self._scan_metadata.pop(event.command_id or "", None)
+            self._open_device_id = None
         if not event.task_id:
             return
         try:
@@ -463,13 +504,16 @@ class WorkerGateway:
             self._scan_metadata.pop(event.command_id or "", None)
 
     def _handle_scan_failed(self, event: EventMessage) -> None:
+        error_code = str(event.payload.get("errorCode", "SCAN_FAILED"))
+        detail = safe_diagnostics(event.payload.get("diagnostics"))
         self._fail_task_from_worker(
             event.task_id,
-            str(event.payload.get("errorCode", "SCAN_FAILED")),
-            "扫描失败",
+            error_code,
+            failure_message(error_code, detail),
         )
         with self._condition:
             self._scan_metadata.pop(event.command_id or "", None)
+            self._open_device_id = None
 
     def _fail_task_from_worker(
         self,
@@ -480,7 +524,10 @@ class WorkerGateway:
         if not task_id:
             return
         task = self._tasks.get(task_id)
-        if task is None or task.status not in {TaskStatus.SCANNING, TaskStatus.STOPPING}:
+        if task is None or task.status not in {
+            TaskStatus.SCANNING,
+            TaskStatus.STOPPING,
+        }:
             return
         try:
             failed = self._tasks.fail_scan(task_id, error_code, message)
@@ -585,7 +632,9 @@ class ApplicationContext:
             raise ApiError("INTERNAL_ERROR") from exc
         values = self._device_status_resolver.enrich_devices(raw_devices)
         self._devices = {
-            item["deviceId"]: item for item in values if isinstance(item.get("deviceId"), str)
+            item["deviceId"]: item
+            for item in values
+            if isinstance(item.get("deviceId"), str)
         }
         self.event_hub.publish(
             {
@@ -624,7 +673,11 @@ class ApplicationContext:
         device_snapshot = body.get("deviceSnapshot")
         if device_snapshot is None:
             device_snapshot = self._devices.get(device_id)
-        for field_name in ("deviceSnapshot", "capabilitySnapshot", "scanParamsSnapshot"):
+        for field_name in (
+            "deviceSnapshot",
+            "capabilitySnapshot",
+            "scanParamsSnapshot",
+        ):
             value = body.get(field_name)
             if value is not None and not isinstance(value, Mapping):
                 raise ValueError(f"{field_name} 必须是 JSON 对象")
@@ -652,9 +705,11 @@ class ApplicationContext:
         task_dir = (self.tasks_root / task_id).resolve()
         output_dir = (task_dir / "originals").resolve()
         output_dir.mkdir(parents=True, exist_ok=True)
-        page_id = f"page-{self.page_repository.next_sequence(task_id):06d}"
+        page_id = f"page-{uuid4().hex}"
         worker_settings = {
-            key: value for key, value in settings.items() if key not in {"outputDir", "pageId"}
+            key: value
+            for key, value in settings.items()
+            if key not in {"outputDir", "pageId"}
         }
         worker_settings.update({"outputDir": str(output_dir), "pageId": page_id})
         try:
@@ -702,7 +757,9 @@ class ApplicationContext:
         try:
             self.worker.stop_scan(task_id)
         except Exception as exc:
-            self.task_service.fail_scan(task_id, "WORKER_UNAVAILABLE", "扫描工作进程不可用")
+            self.task_service.fail_scan(
+                task_id, "WORKER_UNAVAILABLE", "扫描工作进程不可用"
+            )
             if isinstance(exc, (ApiError, WorkerGatewayError)):
                 raise
             raise ApiError("INTERNAL_ERROR") from exc

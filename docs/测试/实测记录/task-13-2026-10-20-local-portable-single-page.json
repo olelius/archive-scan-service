@@ -1,0 +1,49 @@
+{
+  "task": "Task 13 本机便携目录单页冒烟测试",
+  "date": "2026-10-20",
+  "environment": {
+    "location": "开发机本地",
+    "runtime": "ArchiveScanService/runtime/python.exe",
+    "python": "3.12.13",
+    "architecture": "x64",
+    "pnpFriendlyName": "KODAK i2800 Scanner",
+    "pnpStatus": "OK",
+    "twainProductName": "KODAK Scanner: i2000",
+    "twainOnline": true
+  },
+  "startup": {
+    "method": "从便携目录直接运行 runtime/python.exe run.py",
+    "healthCode": 200,
+    "workerReady": true,
+    "listenAddress": "127.0.0.1:17653",
+    "apiDocsRendered": true,
+    "launcherScriptVerified": false
+  },
+  "scan": {
+    "taskId": "task-6a68979170d347f6b98b548371c0ce04",
+    "settings": {
+      "feedMode": "adf_simplex",
+      "resolution": 300
+    },
+    "status": "COMPLETED",
+    "pageCount": 1,
+    "errorCode": null,
+    "pageId": "page-000001",
+    "sequence": 1
+  },
+  "output": {
+    "originalRelativePath": "originals/page-000001.jpg",
+    "thumbnailRelativePath": "thumbnails/page-000001.jpg",
+    "originalFormat": "JPEG",
+    "originalDimensions": [2472, 3608],
+    "originalSizeBytes": 380363,
+    "originalSha256": "b3eae7008b286b38fe0f4f8a24b0087f82a9782e95a191bcf841dcd032187bcf",
+    "thumbnailFormat": "JPEG",
+    "thumbnailDimensions": [219, 320],
+    "thumbnailSizeBytes": 7761,
+    "imageDecodePassed": true,
+    "originalAndThumbnailGetStatus": 200,
+    "thumbnailVisualCheck": "可见正向纸张内容"
+  },
+  "conclusion": "本机便携目录直接启动、ADF 单面一页、页面登记及文件读取通过；启动脚本、客户机部署、双面、长批次和异常场景仍待验证。"
+}

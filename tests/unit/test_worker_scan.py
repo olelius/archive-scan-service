@@ -26,9 +26,9 @@ def test_start_scan_emits_file_ready_and_completed_events(tmp_path: Path):
         def __init__(self):
             self.calls: list[tuple[str, dict]] = []
 
-        def scan_once(self, device_id: str, settings: dict):
+        def scan_pages(self, device_id: str, settings: dict, *, should_stop):
             self.calls.append((device_id, settings))
-            return FileTransferResult(
+            yield FileTransferResult(
                 original_path=tmp_path / "page-1.jpg",
                 size=128,
                 transfer_return_code=6,
@@ -72,7 +72,7 @@ def test_start_scan_emits_scan_failed_when_runtime_fails(tmp_path: Path):
     from app.worker.process import _handle_command
 
     class FakeRuntime:
-        def scan_once(self, device_id: str, settings: dict):
+        def scan_pages(self, device_id: str, settings: dict, *, should_stop):
             raise TwainBackendError("SCANNER_OFFLINE", "设备已断开")
 
     event_queue = Queue()

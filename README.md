@@ -9,9 +9,31 @@ TWAIN Data Source 枚举、Capability 编解码、单面 JPEG 文件传输、HTT
 `D:\archive-scan-service\.venv` 下的 Python 3.12.13 64 位 Conda 环境，解释器为
 `D:\archive-scan-service\.venv\python.exe`。当前真机为 KODAK i2400，已枚举到 `KODAK Scanner: i2000`（x64）；本机
 `kds_i2000.inf` 同时支持 i2400、i2420、i2600、i2620、i2800、i2820。Capability 编解码和规则已完成，真实 Capability
-查询、文件传输和 HTTP/托盘自动化验证已完成；PyInstaller/Inno Setup 安装包和 Task 14 正式真机验收仍未完成。
+查询、文件传输和 HTTP/托盘自动化验证已完成；已生成不依赖客户机 Python/Conda 的 `ArchiveScanService` 便携式测试目录；Task 14 正式真机验收仍未完成。
+
+## 便携式测试交付
+
+当前交付目录位于：
+
+```text
+D:\archive-scan-service\ArchiveScanService
+```
+
+客户机不需要安装 Python、Conda、pip 或项目依赖。将目录复制到客户机最终路径后，先按部署流程运行目录内的 `runtime\Scripts\conda-unpack.exe`，再启动服务；部署前必须单独安装 KODAK i2000 系列 64 位驱动，详细步骤见：
+
+- [便携式交付部署流程](ArchiveScanService/部署流程.md)
+- [便携式交付故障排查](ArchiveScanService/故障排查.md)
+- [Task 13 便携式交付设计](docs/superpowers/specs/2026-07-22-task-13-portable-delivery-design.md)
+
+本目录已完成交付内容检查、运行时导入检查和复制到新路径后的迁移导入检查；本目录用于客户测试，不等同于 Task 14 的 300 张单面、150 张双面、卡纸、断线、恢复和磁盘空间不足验收。
+
+## 扫描接口测试页面
+
+服务启动后打开 <http://127.0.0.1:17653/test>，可调用现有全部 17 个 HTTP 接口和 WebSocket 事件接口，支持设备选择、扫描参数、任务操作及图片预览下载。首次接入新页面入口需要重启服务，后续修改 HTML 只需刷新。详见[测试页使用说明](docs/测试/扫描接口测试页使用说明.md)。
 
 ## 固定范围
+
+本机于 2026-10-20 通过原生 ADF 单面 300 DPI 的 6 张/6 页请求验证：一次启用采集，多页传输，最后结束，并非逐页重新启停。详见[真机记录](docs/测试/实测记录/i2000-native-batch-2026-10-20.json)。双面、数百页及异常场景仍待正式验收。
 
 ```text
 Windows 64位

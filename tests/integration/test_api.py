@@ -150,7 +150,9 @@ def context(tmp_path: Path, fake_worker: FakeWorker):
     from app.config import Settings
 
     application = ApplicationContext(
-        settings=Settings(data_root=tmp_path, allowed_origins=("http://localhost:3000",)),
+        settings=Settings(
+            data_root=tmp_path, allowed_origins=("http://localhost:3000",)
+        ),
         worker=fake_worker,
     )
     yield application
@@ -277,12 +279,30 @@ def test_task_create_list_detail_and_start(client, fake_worker):
     assert detail.json()["data"]["pageCount"] == 0
 
 
+def test_different_tasks_receive_globally_unique_first_page_ids(client, fake_worker):
+    identifiers = []
+    for task_id in ("unique-task-a", "unique-task-b"):
+        client.post("/api/v1/tasks", json={"taskId": task_id, "deviceId": "device-1"})
+        started = client.post(
+            f"/api/v1/tasks/{task_id}/scan/start",
+            json={"settings": {"feedMode": "adf_simplex"}},
+        )
+        assert started.status_code == 200
+        identifiers.append(fake_worker.commands[-1]["settings"]["pageId"])
+        assert client.post(f"/api/v1/tasks/{task_id}/scan/complete").status_code == 200
+    assert identifiers[0] != identifiers[1]
+    assert all(value.startswith("page-") for value in identifiers)
+
+
 def test_task_start_rejects_second_active_scan_with_stable_error(client):
     for task_id in ("task-1", "task-2"):
-        assert client.post(
-            "/api/v1/tasks",
-            json={"taskId": task_id, "deviceId": "device-1"},
-        ).status_code == 200
+        assert (
+            client.post(
+                "/api/v1/tasks",
+                json={"taskId": task_id, "deviceId": "device-1"},
+            ).status_code
+            == 200
+        )
     assert client.post("/api/v1/tasks/task-1/scan/start", json={}).status_code == 200
 
     response = client.post("/api/v1/tasks/task-2/scan/start", json={})
